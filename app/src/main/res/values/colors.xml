@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Swoopr Color Palette -->
+    <color name="brown_suede">#743F1C</color>
+    <color name="strong_turquoise">#449A9D</color>
+    <color name="trendy_gold">#EEC228</color>
+    <color name="orange_passion">#EE8020</color>
+    <color name="deep_madder_lake">#E22C2C</color>
+
+    <!-- Glass Effects (Semi-transparent) -->
+    <color name="glass_white">#B3FFFFFF</color>
+    <color name="glass_turquoise">#B3449A9D</color>
+    <color name="glass_gold">#B3EEC228</color>
+</resources>

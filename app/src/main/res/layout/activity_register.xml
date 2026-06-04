@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/img_logo_small"
+        android:layout_width="249dp"
+        android:layout_height="264dp"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/swoopr_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:background="@drawable/glass_card"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="32dp"
+                android:text="Get Started here..."
+                android:textColor="@color/brown_suede"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/glass_card"
+                android:backgroundTint="#20000000"
+                android:hint="Full Name"
+                android:inputType="textPersonName"
+                android:paddingStart="16dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/glass_card"
+                android:backgroundTint="#20000000"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:paddingStart="16dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/glass_card"
+                android:backgroundTint="#20000000"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:paddingStart="16dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="32dp"
+                android:background="@drawable/glass_card"
+                android:backgroundTint="#20000000"
+                android:hint="Confirm Password"
+                android:inputType="textPassword"
+                android:paddingStart="16dp" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="@color/strong_turquoise"
+                android:text="Create Account"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:text="Already have an account? Login"
+                android:textColor="@color/brown_suede" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

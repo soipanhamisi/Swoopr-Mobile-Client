@@ -1,0 +1,46 @@
+# Gradle files
+.gradle/
+build/
+app/build/
+
+# Android Studio / IntelliJ files
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+app/.externalNativeBuild/
+app/.cxx/
+
+# Output files
+bin/
+gen/
+out/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Virtual Devices
+*.avd/
+*.ini
+
+# Logs
+*.log
+
+# User-specific / IDE Cache
+.navigation/
+navigation/
+.shelf/
+
+# Keystore files (NEVER commit keys to version control)
+*.jks
+*.keystore
+*.pk8
+*.pem
+
+# Google Services (usually excluded to avoid leaking API keys)
+google-services.json

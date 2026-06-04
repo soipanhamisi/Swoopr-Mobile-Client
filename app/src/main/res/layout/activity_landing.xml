@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/img_logo"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/swoopr_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Move smarter, together."
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:layout_marginTop="8dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_login"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="48dp"
+            android:text="Login"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="@color/strong_turquoise"
+            android:textColor="@color/white" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="16dp"
+            android:text="Register"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="@color/orange_passion"
+            android:textColor="@color/white" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
