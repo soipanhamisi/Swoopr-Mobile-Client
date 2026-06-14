@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/delft_blue">
 
     <ImageView
         android:id="@+id/img_logo_small"
@@ -37,7 +38,7 @@
                 android:layout_gravity="center"
                 android:layout_marginBottom="32dp"
                 android:text="Get Started here..."
-                android:textColor="@color/brown_suede"
+                android:textColor="@color/matte_ivory"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
@@ -85,9 +86,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:background="@drawable/rounded_button"
-                android:backgroundTint="@color/strong_turquoise"
+                android:backgroundTint="@color/william"
                 android:text="Create Account"
-                android:textColor="@color/white" />
+                android:textColor="@color/matte_ivory" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -95,7 +96,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="24dp"
                 android:text="Already have an account? Login"
-                android:textColor="@color/brown_suede" />
+                android:textColor="@color/neutral_blush" />
 
         </LinearLayout>
     </ScrollView>

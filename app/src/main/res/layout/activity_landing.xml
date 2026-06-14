@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/delft_blue">
 
     <ImageView
         android:id="@+id/img_logo"
@@ -38,8 +39,8 @@
             android:layout_marginTop="48dp"
             android:text="Login"
             android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/strong_turquoise"
-            android:textColor="@color/white" />
+            android:backgroundTint="@color/william"
+            android:textColor="@color/matte_ivory" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_register"
@@ -48,8 +49,8 @@
             android:layout_marginTop="16dp"
             android:text="Register"
             android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/orange_passion"
-            android:textColor="@color/white" />
+            android:backgroundTint="@color/aloe"
+            android:textColor="@color/matte_ivory" />
 
     </LinearLayout>
 

@@ -3,15 +3,16 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Swoopr Color Palette -->
-    <color name="brown_suede">#743F1C</color>
-    <color name="strong_turquoise">#449A9D</color>
-    <color name="trendy_gold">#EEC228</color>
-    <color name="orange_passion">#EE8020</color>
-    <color name="deep_madder_lake">#E22C2C</color>
+    <!-- Swoopr New Color Palette -->
+    <color name="delft_blue">#222E5E</color>
+    <color name="william">#376A6B</color>
+    <color name="aloe">#71A37E</color>
+    <color name="matte_ivory">#D4CDB2</color>
+    <color name="neutral_blush">#BA97A0</color>
+    <color name="dull_plum">#805375</color>
+    <color name="strong_turquoise">#00A896</color>
 
     <!-- Glass Effects (Semi-transparent) -->
     <color name="glass_white">#B3FFFFFF</color>
-    <color name="glass_turquoise">#B3449A9D</color>
-    <color name="glass_gold">#B3EEC228</color>
+    <color name="glass_dark">#80202020</color>
 </resources>

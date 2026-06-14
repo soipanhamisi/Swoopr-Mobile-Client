@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/delft_blue">
 
     <ImageView
         android:id="@+id/img_logo_small"
@@ -28,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Welcome Back..."
-            android:textColor="@color/brown_suede"
+            android:textColor="@color/matte_ivory"
             android:textSize="28sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -58,7 +59,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Forgot Password?"
-            android:textColor="@color/brown_suede"
+            android:textColor="@color/neutral_blush"
             android:layout_gravity="end"
             android:layout_marginBottom="32dp" />
 
@@ -67,8 +68,8 @@
             android:layout_height="60dp"
             android:text="Login"
             android:background="@drawable/rounded_button"
-            android:backgroundTint="@color/orange_passion"
-            android:textColor="@color/white" />
+            android:backgroundTint="@color/dull_plum"
+            android:textColor="@color/matte_ivory" />
 
     </LinearLayout>
 
