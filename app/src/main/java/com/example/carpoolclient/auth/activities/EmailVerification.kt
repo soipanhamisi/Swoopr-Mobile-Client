@@ -10,7 +10,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.carpoolclient.R
 
+import android.widget.Toast
+import com.example.carpoolclient.auth.webclients.AuthWebClient
+
 class EmailVerification : AppCompatActivity() {
+    private val authWebClient = AuthWebClient()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -34,10 +39,19 @@ class EmailVerification : AppCompatActivity() {
             }
 
             if (isValidUsiuEmail(email)) {
-                // Navigate to OtpVerificationActivity
-                val intent = Intent(this, OtpVerificationActivity::class.java)
-                intent.putExtra("EMAIL", email)
-                startActivity(intent)
+                btnVerify.isEnabled = false
+                authWebClient.getOtp(email) { success, message ->
+                    runOnUiThread {
+                        btnVerify.isEnabled = true
+                        if (success) {
+                            val intent = Intent(this, OtpVerificationActivity::class.java)
+                            intent.putExtra("EMAIL", email)
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(this, "Error: $message", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             } else {
                 etEmail.error = "Please enter a valid @usiu.ac.ke email address"
             }

@@ -12,7 +12,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.carpoolclient.R
 
+import com.example.carpoolclient.auth.webclients.AuthWebClient
+
 class OtpVerificationActivity : AppCompatActivity() {
+    private val authWebClient = AuthWebClient()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -28,8 +32,8 @@ class OtpVerificationActivity : AppCompatActivity() {
         val btnVerifyOtp = findViewById<Button>(R.id.btn_verify_otp)
         val tvMessage = findViewById<TextView>(R.id.tv_otp_message)
 
-        val email = intent.getStringExtra("EMAIL")
-        if (email != null) {
+        val email = intent.getStringExtra("EMAIL") ?: ""
+        if (email.isNotEmpty()) {
             tvMessage.text = getString(R.string.otp_sent_message, email)
         }
 
@@ -37,15 +41,23 @@ class OtpVerificationActivity : AppCompatActivity() {
             val otp = etOtp.text.toString().trim()
 
             if (otp.length == 3) {
-                // Here you would normally verify the OTP with your backend
-                Toast.makeText(this, "OTP Verified Successfully!", Toast.LENGTH_SHORT).show()
-                
-                // Navigate to RegisterActivity to complete profile
-                val intent = Intent(this, RegisterActivity::class.java)
-                startActivity(intent)
-                finish()
+                btnVerifyOtp.isEnabled = false
+                authWebClient.authenticateUser(otp, email) { success, message ->
+                    runOnUiThread {
+                        btnVerifyOtp.isEnabled = true
+                        if (success) {
+                            Toast.makeText(this, "OTP Verified Successfully!", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this, RegisterActivity::class.java)
+                            intent.putExtra("EMAIL", email)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Toast.makeText(this, "Verification failed: $message", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             } else {
-                etOtp.error = "Please enter the 6-digit code"
+                etOtp.error = "Please enter the 3-digit code"
             }
         }
     }

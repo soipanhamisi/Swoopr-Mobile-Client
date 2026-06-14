@@ -14,7 +14,10 @@
     <string name="otp_hint">000</string>
     <string name="create_account_title">Create Account</string>
     <string name="complete_profile_subtitle">Complete your profile</string>
-    <string name="full_name_hint">Full Name</string>
+    <string name="first_name_hint">First Name</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="phone_number_hint">Phone Number</string>
+    <string name="student_id_hint">Student ID</string>
     <string name="password_hint">Password</string>
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="finish_button">Finish</string>
