@@ -1,9 +1,10 @@
-package com.example.carpoolclient.activities
+package com.example.carpoolclient.auth.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +26,7 @@ class OtpVerificationActivity : AppCompatActivity() {
 
         val etOtp = findViewById<EditText>(R.id.et_otp)
         val btnVerifyOtp = findViewById<Button>(R.id.btn_verify_otp)
-        val tvMessage = findViewById<android.widget.TextView>(R.id.tv_otp_message)
+        val tvMessage = findViewById<TextView>(R.id.tv_otp_message)
 
         val email = intent.getStringExtra("EMAIL")
         if (email != null) {

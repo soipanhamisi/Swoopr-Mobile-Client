@@ -1,4 +1,4 @@
-package com.example.carpoolclient.activities
+package com.example.carpoolclient.auth.activities
 
 import android.content.Intent
 import android.os.Bundle

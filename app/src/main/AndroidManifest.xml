@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CarpoolClient">
         <activity
-            android:name=".activities.LandingActivity"
+            android:name=".auth.activities.LandingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,17 +20,17 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.RegisterActivity"
+            android:name=".auth.activities.RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.EmailVerification"
+            android:name=".auth.activities.EmailVerification"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activities.OtpVerificationActivity"
+            android:name=".auth.activities.OtpVerificationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
