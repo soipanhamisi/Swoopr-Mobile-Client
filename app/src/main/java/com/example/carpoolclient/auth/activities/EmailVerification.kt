@@ -11,10 +11,10 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.carpoolclient.R
 
 import android.widget.Toast
-import com.example.carpoolclient.auth.webclients.AuthWebClient
+import com.example.carpoolclient.auth.services.AuthService
 
 class EmailVerification : AppCompatActivity() {
-    private val authWebClient = AuthWebClient()
+    private val authService = AuthService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +40,7 @@ class EmailVerification : AppCompatActivity() {
 
             if (isValidUsiuEmail(email)) {
                 btnVerify.isEnabled = false
-                authWebClient.getOtp(email) { success, message ->
+                authService.getOtp(email) { success, message ->
                     runOnUiThread {
                         btnVerify.isEnabled = true
                         if (success) {

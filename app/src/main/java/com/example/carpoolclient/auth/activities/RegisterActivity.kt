@@ -9,10 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.carpoolclient.MainActivity
 import com.example.carpoolclient.R
 import com.example.carpoolclient.auth.dtos.RegisterRequest
-import com.example.carpoolclient.auth.webclients.AuthWebClient
+import com.example.carpoolclient.auth.services.AuthService
 
 class RegisterActivity : AppCompatActivity() {
-    private val authWebClient = AuthWebClient()
+    private val authService = AuthService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,7 @@ class RegisterActivity : AppCompatActivity() {
             )
 
             btnFinish.isEnabled = false
-            authWebClient.registerUser(registerRequest) { success, message ->
+            authService.registerUser(registerRequest) { success, message ->
                 runOnUiThread {
                     btnFinish.isEnabled = true
                     if (success) {

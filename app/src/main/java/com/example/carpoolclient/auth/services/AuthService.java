@@ -1,4 +1,4 @@
-package com.example.carpoolclient.auth.webclients;
+package com.example.carpoolclient.auth.services;
 
 import com.example.carpoolclient.auth.dtos.*;
 import com.google.gson.Gson;
@@ -13,7 +13,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class AuthWebClient {
+public class AuthService {
     private static final String BASE_URL = "https://swooprserver-373496068484.europe-west1.run.app/auth";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private final OkHttpClient httpClient = new OkHttpClient();

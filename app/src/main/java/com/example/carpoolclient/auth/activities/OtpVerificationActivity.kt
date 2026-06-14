@@ -12,10 +12,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.carpoolclient.R
 
-import com.example.carpoolclient.auth.webclients.AuthWebClient
+import com.example.carpoolclient.auth.services.AuthService
 
 class OtpVerificationActivity : AppCompatActivity() {
-    private val authWebClient = AuthWebClient()
+    private val authService = AuthService()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class OtpVerificationActivity : AppCompatActivity() {
 
             if (otp.length == 3) {
                 btnVerifyOtp.isEnabled = false
-                authWebClient.authenticateUser(otp, email) { success, message ->
+                authService.authenticateUser(otp, email) { success, message ->
                     runOnUiThread {
                         btnVerifyOtp.isEnabled = true
                         if (success) {
