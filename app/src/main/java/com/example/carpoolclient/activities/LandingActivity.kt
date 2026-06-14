@@ -11,12 +11,9 @@ class LandingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_landing)
 
-        findViewById<Button>(R.id.btn_login).setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.btn_register).setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+        findViewById<Button>(R.id.btn_get_started).setOnClickListener {
+            // Navigate to EmailVerification when Get Started is clicked
+            startActivity(Intent(this, EmailVerification::class.java))
         }
     }
 }

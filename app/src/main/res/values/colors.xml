@@ -3,14 +3,31 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Swoopr New Color Palette -->
-    <color name="delft_blue">#222E5E</color>
-    <color name="william">#376A6B</color>
-    <color name="aloe">#71A37E</color>
-    <color name="matte_ivory">#D4CDB2</color>
-    <color name="neutral_blush">#BA97A0</color>
-    <color name="dull_plum">#805375</color>
-    <color name="strong_turquoise">#00A896</color>
+    <!-- Background & Canvas (Deep Forest Slate) -->
+    <!-- Used for the main app background to eliminate night glare -->
+    <color name="earthy_dark_background">#1A201A</color>
+
+    <!-- Surfaces & Containers (Muted Moss Charcoal) -->
+    <!-- Used for ride cards, bottom sheets, and dialog boxes -->
+    <color name="earthy_dark_surface">#252D26</color>
+    <color name="earthy_dark_surface_variant">#2E3830</color>
+
+    <!-- Brand Colors (Glowing Ochre & Terracotta Rust) -->
+    <!-- Used for map routes, primary call-to-action buttons, and ETAs -->
+    <color name="earthy_dark_primary">#F2AF5C</color>
+    <color name="earthy_dark_secondary">#E67E65</color>
+    <color name="earthy_dark_accent">#8FA382</color> <!-- Soft Sage Accent -->
+
+    <!-- Text & Typography (Parchment White & Soft Sage) -->
+    <!-- Engineered to prevent eye strain and text bleeding in dark mode -->
+    <color name="earthy_dark_text_primary">#EBE8E2</color>   <!-- High contrast: Names, addresses -->
+    <color name="earthy_dark_text_secondary">#9EABA0</color> <!-- Medium contrast: Timestamps, distances -->
+    <color name="earthy_dark_text_disabled">#606B62</color>  <!-- Low contrast: Inactive tabs -->
+
+    <!-- Interactive Component Text Colors -->
+    <!-- Color of text when placed directly on top of primary/secondary elements -->
+    <color name="earthy_dark_on_primary">#231707</color>     <!-- Dark brown/black for high contrast on Ochre -->
+    <color name="earthy_dark_on_secondary">#290B04</color>
 
     <!-- Glass Effects (Semi-transparent) -->
     <color name="glass_white">#B3FFFFFF</color>

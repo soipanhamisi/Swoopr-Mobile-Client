@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Swoopr</string>
+    <string name="tagLine">Tap. Match. Ride together</string>
+    <string name="get_started">Get Started</string>
+    <string name="logo_description">Swoopr Logo</string>
+    <string name="email_verification_title">Email Verification</string>
+    <string name="usiu_email_hint">Please use your USIU email address</string>
+    <string name="email_example">example@usiu.ac.ke</string>
+    <string name="verify_email">Verify Email</string>
+    <string name="otp_verification_title">Enter OTP</string>
+    <string name="otp_sent_message">Please check your inbox. We\'ve sent a 3-digit code to %1$s</string>
+    <string name="verify_otp">Verify &amp; Proceed</string>
+    <string name="resend_otp">Didn\'t receive code? Resend</string>
+    <string name="otp_hint">000</string>
+    <string name="create_account_title">Create Account</string>
+    <string name="complete_profile_subtitle">Complete your profile</string>
+    <string name="full_name_hint">Full Name</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="finish_button">Finish</string>
 </resources>
