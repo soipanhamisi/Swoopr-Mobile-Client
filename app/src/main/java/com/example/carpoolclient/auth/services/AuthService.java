@@ -4,6 +4,7 @@ import com.example.carpoolclient.auth.dtos.*;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -16,7 +17,11 @@ import okhttp3.Response;
 public class AuthService {
     private static final String BASE_URL = "https://swooprserver-373496068484.europe-west1.run.app/auth";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private final OkHttpClient httpClient = new OkHttpClient();
+    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+            .connectTimeout(0, TimeUnit.MILLISECONDS)
+            .readTimeout(0, TimeUnit.MILLISECONDS)
+            .writeTimeout(0, TimeUnit.MILLISECONDS)
+            .build();
     private final Gson gson = new Gson();
 
     public interface AuthCallback {

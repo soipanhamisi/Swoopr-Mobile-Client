@@ -21,4 +21,5 @@
     <string name="password_hint">Password</string>
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="finish_button">Finish</string>
+    <string name="loading">Loading...</string>
 </resources>

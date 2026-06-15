@@ -11,8 +11,10 @@ activityKtx = "1.8.0"
 constraintlayout = "2.1.4"
 okhttp = "5.4.0"
 retrofit = "2.11.0"
+lottie = "6.1.0"
 
 [libraries]
+lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
