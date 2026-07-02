@@ -18,7 +18,7 @@ import com.example.carpoolclient.auth.services.AuthService;
 import com.example.carpoolclient.utils.LoadingDialog;
 
 public class EmailVerification extends AppCompatActivity {
-    private final AuthService authService = new AuthService();
+    private AuthService authService;
     private LoadingDialog loadingDialog;
 
     @Override
@@ -27,6 +27,7 @@ public class EmailVerification extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_email_verification);
 
+        authService = new AuthService(this);
         loadingDialog = new LoadingDialog(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

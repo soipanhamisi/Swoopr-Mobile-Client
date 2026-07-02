@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.gson)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
     implementation(libs.lottie)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

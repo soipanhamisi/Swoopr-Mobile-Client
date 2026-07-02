@@ -16,7 +16,7 @@ public final class SecureTokenStore {
     private static SecureTokenStore instance;
     private final SharedPreferences prefs;
 
-    private SecureTokenStore(Context context) {
+    public SecureTokenStore(Context context) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)

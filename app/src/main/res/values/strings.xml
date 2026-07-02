@@ -22,4 +22,12 @@
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="finish_button">Finish</string>
     <string name="loading">Loading...</string>
+    <string name="google_maps_key">AIzaSyAdvu5x0-Dqvbx8du8Oh0fWRCFYXOIQ5</string>
+    <string name="trip_map_title">Select Destination</string>
+    <string name="trip_select_destination_hint">Tap on the map to choose your destination</string>
+    <string name="trip_join_carpool">Join Carpool</string>
+    <string name="trip_location_permission_required">Location permission is required to fetch your origin.</string>
+    <string name="trip_destination_required">Please select a destination on the map.</string>
+    <string name="trip_origin_unavailable">Unable to fetch your current location. Turn on location and try again.</string>
+    <string name="trip_join_success">Trip match request submitted successfully.</string>
 </resources>

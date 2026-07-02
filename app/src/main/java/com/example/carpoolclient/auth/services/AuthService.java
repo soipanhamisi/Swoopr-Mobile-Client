@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 
 import com.example.carpoolclient.auth.dtos.*;
 import com.example.carpoolclient.auth.storage.SecureTokenStore;
-import com.example.carpoolclient.CarpoolClientApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -45,9 +44,6 @@ public class AuthService {
         this.currentJwtToken = tokenStore.getJwtToken();
     }
 
-    public AuthService() {
-        this(CarpoolClientApp.getContext());
-    }
 
     public interface AuthCallback {
         void onResult(boolean success, String message);
