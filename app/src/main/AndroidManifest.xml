@@ -36,6 +36,12 @@
             android:name=".auth.activities.OtpVerificationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <service android:name=".FireBaseMessaging"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
