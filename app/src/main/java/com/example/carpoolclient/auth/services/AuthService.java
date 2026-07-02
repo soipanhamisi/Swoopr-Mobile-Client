@@ -1,11 +1,14 @@
 package com.example.carpoolclient.auth.services;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.annotation.NonNull;
 
 import com.example.carpoolclient.auth.dtos.*;
+import com.example.carpoolclient.auth.storage.SecureTokenStore;
+import com.example.carpoolclient.CarpoolClientApp;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -34,7 +37,17 @@ public class AuthService {
             .writeTimeout(0, TimeUnit.MILLISECONDS)
             .build();
     private final Gson gson = new Gson();
+    private final SecureTokenStore tokenStore;
     private volatile String currentJwtToken;
+
+    public AuthService(Context context) {
+        this.tokenStore = SecureTokenStore.getInstance(context);
+        this.currentJwtToken = tokenStore.getJwtToken();
+    }
+
+    public AuthService() {
+        this(CarpoolClientApp.getContext());
+    }
 
     public interface AuthCallback {
         void onResult(boolean success, String message);
@@ -60,11 +73,11 @@ public class AuthService {
     public void registerUser(RegisterRequest registerRequest, AuthCallback callback) {
         fetchMessagingToken(token -> {
             String fullName = buildFullName(registerRequest);
-            saveUser(fullName, registerRequest.getEmail(), DEFAULT_ROLE, token, callback);
+            saveUser(fullName, registerRequest.getEmail(), DEFAULT_ROLE, callback);
         });
     }
 
-    public void saveUser(String fullName, String email, String role, String messagingToken, AuthCallback callback) {
+    public void saveUser(String fullName, String email, String role, AuthCallback callback) {
         JsonObject payload = new JsonObject();
         payload.addProperty("fullName", fullName);
         payload.addProperty("email", email);
@@ -151,7 +164,9 @@ public class AuthService {
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        tokenCallback.onToken(task.getResult());
+                        String token = task.getResult();
+                        tokenStore.saveFcmToken(token);
+                        tokenCallback.onToken(token);
                         return;
                     }
 
@@ -201,6 +216,7 @@ public class AuthService {
                         String authorization = res.header("Authorization");
                         if (authorization != null && !authorization.trim().isEmpty()) {
                             currentJwtToken = authorization;
+                            tokenStore.saveJwtToken(authorization);
                         }
                         callback.onResult(true, responseBody);
                     } else {
