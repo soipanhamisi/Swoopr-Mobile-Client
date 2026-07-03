@@ -43,7 +43,7 @@ This document outlines the current authentication, registration, token managemen
   ```json
   {
     "email": "user@example.com",
-    "otp": "123456"
+    "otp": "123"
   }
   ```
   * `email` (String): The user's email address.

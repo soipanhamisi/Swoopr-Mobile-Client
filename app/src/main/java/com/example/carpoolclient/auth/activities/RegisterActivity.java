@@ -13,10 +13,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carpoolclient.MainActivity;
 import com.example.carpoolclient.R;
 import com.example.carpoolclient.auth.dtos.RegisterRequest;
 import com.example.carpoolclient.auth.services.AuthService;
+import com.example.carpoolclient.tripManagement.MainMapActivity;
 import com.example.carpoolclient.utils.LoadingDialog;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -43,8 +43,6 @@ public class RegisterActivity extends AppCompatActivity {
         EditText etLastName = findViewById(R.id.et_last_name);
         EditText etPhoneNumber = findViewById(R.id.et_phone_number);
         EditText etStudentId = findViewById(R.id.et_student_id);
-        EditText etPassword = findViewById(R.id.et_password);
-        EditText etConfirmPassword = findViewById(R.id.et_confirm_password);
         Button btnFinish = findViewById(R.id.btn_complete_registration);
         ScrollView scrollView = findViewById(R.id.scroll_view);
 
@@ -53,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
             email = "";
         }
 
-        EditText[] editTexts = new EditText[]{etFirstName, etLastName, etPhoneNumber, etStudentId, etPassword, etConfirmPassword};
+        EditText[] editTexts = new EditText[]{etFirstName, etLastName, etPhoneNumber, etStudentId};
         for (EditText et : editTexts) {
             et.setOnFocusChangeListener((v, hasFocus) -> {
                 if (hasFocus) {
@@ -68,24 +66,17 @@ public class RegisterActivity extends AppCompatActivity {
             String lastName = etLastName.getText().toString().trim();
             String phoneNumber = etPhoneNumber.getText().toString().trim();
             String studentId = etStudentId.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-            String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            if (firstName.isEmpty() || lastName.isEmpty() || phoneNumber.isEmpty() || studentId.isEmpty() || password.isEmpty()) {
+            if (firstName.isEmpty() || lastName.isEmpty() || phoneNumber.isEmpty() || studentId.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if (!password.equals(confirmPassword)) {
-                etConfirmPassword.setError("Passwords do not match");
-                return;
-            }
 
             RegisterRequest registerRequest = new RegisterRequest(
                     firstName,
                     lastName,
                     finalEmail,
-                    password,
                     phoneNumber,
                     studentId
             );
@@ -93,26 +84,28 @@ public class RegisterActivity extends AppCompatActivity {
             btnFinish.setEnabled(false);
             loadingDialog.show();
             authService.registerUser(registerRequest, (success, message) -> runOnUiThread(() -> {
-                btnFinish.setEnabled(true);
-                loadingDialog.dismiss();
                 if (success) {
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    authService.sendMessagingToken((tokenSuccess, tokenMessage) -> runOnUiThread(() -> {
+                        btnFinish.setEnabled(true);
+                        loadingDialog.dismiss();
+
+                        if (!tokenSuccess) {
+                            Toast.makeText(this, "Failed to submit messaging token: " + tokenMessage, Toast.LENGTH_SHORT).show();
+                        }
+
+                        Intent intent = new Intent(this, MainMapActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    }));
                 } else {
+                    btnFinish.setEnabled(true);
+                    loadingDialog.dismiss();
                     String displayMessage = message != null && message.toLowerCase().contains("user exists")
                             ? "Account already registered"
                             : message;
                     Toast.makeText(this, "Registration failed: " + displayMessage, Toast.LENGTH_LONG).show();
-                }
-            }));
-            authService.sendMessagingToken((success, message) -> runOnUiThread(() -> {
-                if (success) {
-                    Toast.makeText(this, "Messaging token submitted", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Failed to submit messaging token: " + message, Toast.LENGTH_SHORT).show();
                 }
             }));
         });

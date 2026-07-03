@@ -26,7 +26,7 @@ import okhttp3.Response;
 
 public class AuthService {
     private static final String BASE_URL = "https://swooprserver-373496068484.europe-west1.run.app/auth";
-    private static final String DEFAULT_ROLE = "STUDENT";
+    private static final String DEFAULT_ROLE = "NORMAL_USER";
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private static final long JWT_WAIT_TIMEOUT_MS = 5_000L;
     private static final long JWT_WAIT_INTERVAL_MS = 100L;
@@ -44,6 +44,41 @@ public class AuthService {
         this.currentJwtToken = tokenStore.getJwtToken();
     }
 
+    public void refreshToken(String email, AuthCallback callback) {
+        Request request = postRequest("/refreshToken", RequestBody.create(email, JSON));
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onResult(false, e.getMessage());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                try (Response res = response) {
+                    String responseBody = res.body() != null ? res.body().string().trim() : "";
+                    if (!res.isSuccessful()) {
+                        callback.onResult(false, responseBody.isEmpty() ? "Error: " + res.code() : responseBody);
+                        return;
+                    }
+
+                    String token = responseBody;
+                    if (token.isEmpty()) {
+                        String authorization = res.header("Authorization");
+                        token = authorization != null ? authorization.trim() : "";
+                    }
+
+                    if (token.isEmpty()) {
+                        callback.onResult(false, "Token not returned by server");
+                        return;
+                    }
+
+                    currentJwtToken = token;
+                    tokenStore.saveJwtToken(token);
+                    callback.onResult(true, token);
+                }
+            }
+        });
+    }
 
     public interface AuthCallback {
         void onResult(boolean success, String message);
@@ -207,7 +242,7 @@ public class AuthService {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 try (Response res = response) {
-                    String responseBody = res.body().string();
+                    String responseBody = res.body() != null ? res.body().string() : "";
                     if (res.isSuccessful()) {
                         String authorization = res.header("Authorization");
                         if (authorization != null && !authorization.trim().isEmpty()) {

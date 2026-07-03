@@ -64,10 +64,6 @@ public class RideSeekerService {
                             OriginDestinationCoordinates originDestinationCoordinates,
                             TripManagementCallback callback){
         String jwt = getJwt();
-        if (jwt == null || jwt.trim().isEmpty()) {
-            callback.responseHandler(false, "JWT token missing. Please log in again.");
-            return;
-        }
 
         JoinCarpoolRequest payload = new JoinCarpoolRequest();
         payload.setDepartureTime(departureTime.toString());

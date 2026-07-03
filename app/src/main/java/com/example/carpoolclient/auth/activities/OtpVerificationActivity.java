@@ -16,11 +16,16 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.R;
 import com.example.carpoolclient.auth.services.AuthService;
+import com.example.carpoolclient.auth.storage.SecureTokenStore;
+import com.example.carpoolclient.tripManagement.MainMapActivity;
 import com.example.carpoolclient.utils.LoadingDialog;
 
 public class OtpVerificationActivity extends AppCompatActivity {
+    private static final int OTP_LENGTH = 3;
+
     private AuthService authService;
     private LoadingDialog loadingDialog;
+    private boolean isRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +33,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_otp_verification);
 
+        isRefresh = getIntent().getBooleanExtra("REFRESH_TOKEN", false);
         authService = new AuthService(this);
         loadingDialog = new LoadingDialog(this);
 
@@ -58,30 +64,90 @@ public class OtpVerificationActivity extends AppCompatActivity {
         }
 
         final String finalEmail = email;
-        btnVerifyOtp.setOnClickListener(v -> {
-            String otp = etOtp.getText().toString().trim();
+        btnVerifyOtp.setOnClickListener(v -> handleVerifyOtpClick(etOtp, btnVerifyOtp, finalEmail));
+    }
 
-            if (otp.length() == 3) {
-                btnVerifyOtp.setEnabled(false);
-                loadingDialog.show();
-                authService.authenticateUser(otp, finalEmail, (success, message) -> runOnUiThread(() -> {
-                    btnVerifyOtp.setEnabled(true);
-                    loadingDialog.dismiss();
-                    if (success) {
-                        Toast.makeText(this, "OTP Verified Successfully!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(this, RegisterActivity.class);
-                        intent.putExtra("EMAIL", finalEmail);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Verification failed: " + message, Toast.LENGTH_LONG).show();
-                    }
-                }));
+    private void handleVerifyOtpClick(EditText etOtp, Button btnVerifyOtp, String email) {
+        String otp = etOtp.getText().toString().trim();
+        
+        if (otp.length() == OTP_LENGTH) {
+            verifyOtp(otp, email, btnVerifyOtp);
+        } else {
+            etOtp.setError("Please enter the 3-digit code");
+        }
+    }
+
+    private void verifyOtp(String otp, String email, Button btnVerifyOtp) {
+        btnVerifyOtp.setEnabled(false);
+        loadingDialog.show();
+        
+        authService.authenticateUser(otp, email, (success, message) -> 
+            runOnUiThread(() -> handleAuthenticationResponse(success, message, email, btnVerifyOtp))
+        );
+    }
+
+    private void handleAuthenticationResponse(boolean success, String message, String email, Button btnVerifyOtp) {
+        btnVerifyOtp.setEnabled(true);
+        loadingDialog.dismiss();
+        
+        if (success) {
+            showSuccessMessage();
+
+            if (isRefresh) {
+                handleTokenRefresh(email);
             } else {
-                etOtp.setError("Please enter the 3-digit code");
+                handleFirstInstallOrNewDevice(email);
             }
+        } else {
+            showErrorMessage(message);
+        }
+    }
+
+    private void showSuccessMessage() {
+        Toast.makeText(this, "OTP Verified Successfully!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showErrorMessage(String message) {
+        Toast.makeText(this, "Verification failed: " + message, Toast.LENGTH_LONG).show();
+    }
+
+    private void handleTokenRefresh(String email) {
+        authService.refreshToken(email, (result, token) -> {
+            runOnUiThread(() -> {
+                if (!result) {
+                    showErrorMessage(token);
+                    return;
+                }
+
+                SecureTokenStore.getInstance(this).saveJwtToken(token);
+                authService.sendMessagingToken((syncSuccess, syncMessage) -> runOnUiThread(this::navigateToMainMap));
+            });
         });
     }
+
+    private void handleFirstInstallOrNewDevice(String email) {
+        authService.refreshToken(email, (result, tokenOrMessage) -> runOnUiThread(() -> {
+            if (result) {
+                SecureTokenStore.getInstance(this).saveJwtToken(tokenOrMessage);
+                authService.sendMessagingToken((syncSuccess, syncMessage) -> runOnUiThread(this::navigateToMainMap));
+                return;
+            }
+
+            navigateToRegister(email);
+        }));
+    }
+
+    private void navigateToMainMap() {
+        Intent intent = new Intent(this, MainMapActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToRegister(String email) {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        intent.putExtra("EMAIL", email);
+        startActivity(intent);
+        finish();
+    }
 }
-
-

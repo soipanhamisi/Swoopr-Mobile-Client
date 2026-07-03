@@ -1,6 +1,7 @@
 package com.example.carpoolclient.tripManagement;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Button;
@@ -18,6 +19,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.R;
+import com.example.carpoolclient.auth.activities.EmailVerification;
 import com.example.carpoolclient.auth.storage.SecureTokenStore;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -148,6 +150,10 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
                     if (status) {
                         Toast.makeText(this, R.string.trip_join_success, Toast.LENGTH_SHORT).show();
                         return;
+                    }else if (status == false){
+                        Intent intent = new Intent(this, EmailVerification.class);
+                        intent.putExtra("REFRESH_TOKEN", true);
+                        startActivity(intent);
                     }
 
                     Toast.makeText(this, message, Toast.LENGTH_LONG).show();

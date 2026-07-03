@@ -1,0 +1,16 @@
+--> fix the authentication work flow:
+1. on first install::
+xtics: no record of the user is in db, no barer token, no fcm token in db
+flow: landing *clicks getStartedBtn-> email verification -> otp verification
+-> register *get barer token, *send fcm token in db -> main map Activity
+
+2. normal app access
+xtics: barer token present locally, fcm token in db
+flow: Check if Barer Token field is empty -> main map Activity
+if token is Expired -> email verification -> otp verification -> getRefreshToken
+-> set new Barer Token -> main map Activity.
+
+3. new device access
+xtics:no barer token, fcm token in db is stale
+flow: email verification -> otp verification *send fcm token to db-> getRefreshToken
+-> set new Barer Token -> main map Activity.

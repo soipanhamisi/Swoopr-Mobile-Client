@@ -47,7 +47,8 @@
                     android:text="@string/email_verification_title"
                     android:textColor="@color/earthy_dark_text_primary"
                     android:textSize="28sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:fontFamily="@font/inter" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -56,7 +57,8 @@
                     android:layout_marginBottom="32dp"
                     android:text="@string/usiu_email_hint"
                     android:textColor="@color/earthy_dark_text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:fontFamily="@font/inter"/>
 
                 <EditText
                     android:id="@+id/et_email"
@@ -75,10 +77,11 @@
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_verify"
-                    android:layout_width="match_parent"
+                    android:layout_width="197dp"
                     android:layout_height="60dp"
                     android:background="@drawable/rounded_button"
                     android:backgroundTint="@color/earthy_dark_primary"
+                    android:fontFamily="@font/inter"
                     android:text="@string/verify_email"
                     android:textAllCaps="false"
                     android:textColor="@color/earthy_dark_on_primary"

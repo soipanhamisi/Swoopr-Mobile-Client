@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/earthy_dark_background">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btn_verifyEmail"
+        android:layout_width="201dp"
+        android:layout_height="26dp"
+        android:layout_margin="32dp"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="@color/earthy_dark_on_secondary"
+        android:fontFamily="@font/inter"
+        android:text="@string/verifyEmailOption"
+        android:textAllCaps="false"
+        android:textColor="@color/earthy_dark_primary"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.927" />
 
     <ImageView
         android:id="@+id/img_logo"
@@ -13,33 +33,20 @@
         android:src="@drawable/swoopr_logo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintHorizontal_bias="0.427"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35"
+        app:layout_constraintVertical_bias="0.388"
         app:layout_constraintVertical_chainStyle="packed" />
-
-    <TextView
-        android:id="@+id/txt_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/tagLine"
-        android:textColor="@color/earthy_dark_text_secondary"
-        android:textSize="15sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_get_started"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.789" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_get_started"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_width="261dp"
+        android:layout_height="67dp"
         android:layout_margin="32dp"
         android:background="@drawable/rounded_button"
         android:backgroundTint="@color/earthy_dark_primary"
+        android:fontFamily="@font/workforce_sans"
         android:text="@string/get_started"
         android:textAllCaps="false"
         android:textColor="@color/earthy_dark_on_primary"

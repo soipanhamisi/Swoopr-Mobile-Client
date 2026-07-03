@@ -16,6 +16,16 @@ public final class SecureTokenStore {
     private static SecureTokenStore instance;
     private final SharedPreferences prefs;
 
+    private boolean isVerified;
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
+    }
+
     public SecureTokenStore(Context context) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)

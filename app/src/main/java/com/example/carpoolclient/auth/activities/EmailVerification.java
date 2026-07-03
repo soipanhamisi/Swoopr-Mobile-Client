@@ -26,6 +26,7 @@ public class EmailVerification extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_email_verification);
+        boolean refresh = getIntent().getBooleanExtra("REFRESH_TOKEN", false);
 
         authService = new AuthService(this);
         loadingDialog = new LoadingDialog(this);
@@ -64,6 +65,7 @@ public class EmailVerification extends AppCompatActivity {
                     if (success) {
                         Intent intent = new Intent(this, OtpVerificationActivity.class);
                         intent.putExtra("EMAIL", email);
+                        intent.putExtra("REFRESH_TOKEN", refresh);
                         startActivity(intent);
                     } else {
                         String displayMessage = message != null && message.toLowerCase().contains("user exists")

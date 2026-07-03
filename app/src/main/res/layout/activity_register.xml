@@ -117,36 +117,6 @@
                     android:textColor="@color/earthy_dark_text_primary"
                     android:textColorHint="@color/earthy_dark_text_disabled" />
 
-                <EditText
-                    android:id="@+id/et_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="12dp"
-                    android:autofillHints="password"
-                    android:background="@drawable/glass_card"
-                    android:backgroundTint="#20000000"
-                    android:hint="@string/password_hint"
-                    android:inputType="textPassword"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/earthy_dark_text_primary"
-                    android:textColorHint="@color/earthy_dark_text_disabled" />
-
-                <EditText
-                    android:id="@+id/et_confirm_password"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="24dp"
-                    android:autofillHints="password"
-                    android:background="@drawable/glass_card"
-                    android:backgroundTint="#20000000"
-                    android:hint="@string/confirm_password_hint"
-                    android:inputType="textPassword"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/earthy_dark_text_primary"
-                    android:textColorHint="@color/earthy_dark_text_disabled" />
-
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btn_complete_registration"
                     android:layout_width="match_parent"

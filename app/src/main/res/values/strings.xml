@@ -30,4 +30,5 @@
     <string name="trip_destination_required">Please select a destination on the map.</string>
     <string name="trip_origin_unavailable">Unable to fetch your current location. Turn on location and try again.</string>
     <string name="trip_join_success">Trip match request submitted successfully.</string>
+    <string name="verifyEmailOption">have an account? Verify Email Here</string>
 </resources>
