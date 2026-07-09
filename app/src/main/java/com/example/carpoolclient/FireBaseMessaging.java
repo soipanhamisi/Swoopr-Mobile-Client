@@ -18,6 +18,27 @@ public class FireBaseMessaging extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage message) {
         super.onMessageReceived(message);
-        Log.d("FireBaseMessaging", "Message received: " + message.getData());
+
+        Log.d("FireBaseMessaging", "──── Firebase Message Received ────");
+        Log.d("FireBaseMessaging", "Message ID   : " + message.getMessageId());
+        Log.d("FireBaseMessaging", "From         : " + message.getFrom());
+
+        // Log notification payload (shown when app is in foreground)
+        if (message.getNotification() != null) {
+            RemoteMessage.Notification notification = message.getNotification();
+            Log.d("FireBaseMessaging", "Notif Title  : " + notification.getTitle());
+            Log.d("FireBaseMessaging", "Notif Body   : " + notification.getBody());
+        } else {
+            Log.d("FireBaseMessaging", "Notification : (none)");
+        }
+
+        // Log data payload
+        if (!message.getData().isEmpty()) {
+            Log.d("FireBaseMessaging", "Data Payload : " + message.getData());
+        } else {
+            Log.d("FireBaseMessaging", "Data Payload : (empty)");
+        }
+
+        Log.d("FireBaseMessaging", "───────────────────────────────────");
     }
 }

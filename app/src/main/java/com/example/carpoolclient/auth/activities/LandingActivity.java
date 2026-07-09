@@ -17,10 +17,25 @@ public class LandingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        android.util.Log.e("TOKEN_CHECK", "!!! LANDING ACTIVITY CREATED !!!");
         setContentView(R.layout.activity_landing);
 
         tokenStore = SecureTokenStore.getInstance(this);
         authService = new AuthService(this);
+
+        // Explicitly fetch and log the token as an ERROR so it stands out in red
+        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        android.util.Log.e("TOKEN_CHECK", "FAILED TO GET TOKEN: " + task.getException());
+                        return;
+                    }
+                    String token = task.getResult();
+                    android.util.Log.e("TOKEN_CHECK", "FOUND_FCM_TOKEN: " + token);
+                });
+
+        String storedToken = tokenStore.getFcmToken();
+        android.util.Log.d("FCM_DEBUG", "FCM Token from Storage: " + (storedToken != null ? storedToken : "None stored"));
 
         handleStartupRouting();
 

@@ -135,10 +135,12 @@ public class AuthService {
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()){
                         Exception exception = task.getException();
+                        android.util.Log.e("AuthService", "Fetching FCM registration token failed", exception);
                         callback.onResult(false, exception != null ? exception.getMessage() : "Unable to fetch messaging token");
                         return;
                     }
                     String token = task.getResult();
+                    android.util.Log.d("AuthService", "FCM Token: " + token);
 
                     waitForJwtToken(jwt -> {
                         if (jwt == null || jwt.trim().isEmpty()) {
@@ -196,11 +198,13 @@ public class AuthService {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         String token = task.getResult();
+                        android.util.Log.d("AuthService", "FCM Token fetched for registration: " + token);
                         tokenStore.saveFcmToken(token);
                         tokenCallback.onToken(token);
                         return;
                     }
 
+                    android.util.Log.e("AuthService", "FCM Token fetch failed", task.getException());
                     tokenCallback.onToken(null);
                 });
     }
