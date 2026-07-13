@@ -1,4 +1,4 @@
-package com.example.carpoolclient.auth.activities;
+package com.example.carpoolclient;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,13 +13,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carpoolclient.R;
-import com.example.carpoolclient.auth.services.AuthService;
+import com.example.carpoolclient.dtos.EmailDto;
 import com.example.carpoolclient.utils.LoadingDialog;
+import com.example.carpoolclient.utils.WebClient;
 
-public class EmailVerification extends AppCompatActivity {
-    private AuthService authService;
+public class EmailVerificationActivity extends AppCompatActivity {
     private LoadingDialog loadingDialog;
+    private WebClient webClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +28,7 @@ public class EmailVerification extends AppCompatActivity {
         setContentView(R.layout.activity_email_verification);
         boolean refresh = getIntent().getBooleanExtra("REFRESH_TOKEN", false);
 
-        authService = new AuthService(this);
+        webClient = new WebClient(this);
         loadingDialog = new LoadingDialog(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -59,25 +59,30 @@ public class EmailVerification extends AppCompatActivity {
             if (isValidUsiuEmail(email)) {
                 btnVerify.setEnabled(false);
                 loadingDialog.show();
-                authService.getOtp(email, (success, message) -> runOnUiThread(() -> {
-                    btnVerify.setEnabled(true);
-                    loadingDialog.dismiss();
-                    if (success) {
-                        Intent intent = new Intent(this, OtpVerificationActivity.class);
-                        intent.putExtra("EMAIL", email);
-                        intent.putExtra("REFRESH_TOKEN", refresh);
-                        startActivity(intent);
-                    } else {
-                        String displayMessage = message != null && message.toLowerCase().contains("user exists")
-                                ? "Account already registered"
-                                : message;
-                        Toast.makeText(this, "Error: " + displayMessage, Toast.LENGTH_LONG).show();
-                    }
-                }));
-            } else {
+                EmailDto emailDto = new EmailDto();
+                emailDto.setEmail(email);
+                webClient.post("/auth/getOtp", emailDto, Void.class, (success, message, data) -> {
+                        if (success) {
+                            loadingDialog.dismiss();
+                            goToOtpVerification(email);
+                        } else {
+                            btnVerify.setEnabled(true);
+                            loadingDialog.dismiss();
+                            Toast.makeText(EmailVerificationActivity.this, message, Toast.LENGTH_LONG).show();
+                        }
+                    });
+               } else {
                 etEmail.setError("Please enter a valid @usiu.ac.ke email address");
             }
         });
+    }
+
+    private void goToOtpVerification(String email) {
+        Intent intent = new Intent(EmailVerificationActivity.this, OtpVerificationActivity.class);
+        intent.putExtra("EMAIL", email);
+        intent.putExtra("REFRESH_TOKEN", getIntent().getBooleanExtra("REFRESH_TOKEN", false));
+        startActivity(intent);
+        finish();
     }
 
     private boolean isValidUsiuEmail(String email) {

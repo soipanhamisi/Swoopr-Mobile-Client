@@ -1,291 +1,573 @@
-# 1.0.0 Authentication API
-
-This document outlines the current authentication, registration, token management, and trip management endpoints exposed by the Swoopd server.
-
-> **Important:** The current token verification code expects the raw JWT value in the `Authorization` header. It does not strip a `Bearer ` prefix.
+# Swoopd: OTP to Trip Creation Workflow
+**Live GCP Base URL:** `https://swooprserver-373496068484.europe-west1.run.app`
 
 ---
 
-## 1.0.1 `POST /auth/getOtp`
+## Quick Workflow Overview
 
-**Description:** Sends a One-Time Password (OTP) to the provided email address for user verification. This endpoint should be called before attempting to authenticate or register a user.
-
-**Request:**
-- **Method:** `POST`
-- **Path:** `/auth/getOtp`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "email": "user@example.com"
-  }
-  ```
-  * `email` (String): The email address to which the OTP will be sent.
-
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"OTP sent"`
-- **Error Responses:**
-  - `400 Bad Request`: If the email format is invalid or other issues prevent OTP generation.
+```
+1. User enters email
+   ↓
+2. Request OTP → Email sent
+   ↓
+3. User enters OTP code
+   ↓
+4. Verify OTP → Get JWT token
+   ↓
+5. Register/Save user profile
+   ↓
+6. Register vehicle (if host)
+   ↓
+7. Create trip (if host) OR join carpool (if seeker)
+   ↓
+8. Monitor real-time notifications (FCM)
+```
 
 ---
 
-## 1.0.2 `POST /auth/authenticateUser`
+## 1. AUTHENTICATION FLOW
 
-**Description:** Authenticates a user using their email and a received OTP. This endpoint verifies the OTP and confirms the user's identity.
+### 1.1 Request OTP
+
+**Endpoint:** `POST /auth/getOtp`
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/auth/authenticateUser`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "email": "user@example.com",
-    "otp": "123"
-  }
-  ```
-  * `email` (String): The user's email address.
-  * `otp` (String): The OTP received by the user.
+```json
+{
+  "email": "student@usiu.ac.ke"
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"user authenticated"`
-- **Error Responses:**
-  - `401 Unauthorized`: If the OTP is incorrect or has expired.
-  - `401 Unauthorized`: `"user not authenticated"` when OTP verification fails.
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "OTP sent to email",
+  "data": null
+}
+```
+
+**Purpose:** Sends one-time password to student email  
+**OTP Valid For:** ~10-15 minutes  
+**Requirements:** Valid USIU email only
 
 ---
 
-## 1.0.3 `POST /auth/saveUser`
+### 1.2 Verify OTP & Get JWT Token
 
-**Description:** Registers a new user in the system. Upon successful registration, a JWT token is returned in the `Authorization` header.
+**Endpoint:** `POST /auth/getNewToken`
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/auth/saveUser`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "fullName": "John Doe",
-    "email": "john.doe@example.com",
-    "role": "STUDENT",
-    "messagingToken": "optional-device-token"
-  }
-  ```
-  * `fullName` (String): The user's full name.
-  * `email` (String): The user's email address.
-  * `role` (Role): The user's role in the system.
-  * `messagingToken` (String): Optional device messaging token stored during registration.
+```json
+{
+  "email": "student@usiu.ac.ke",
+  "otp": 123456
+}
+```
 
-**Response:**
-- **Status:** `201 Created`
-- **Content-Type:** `text/plain`
-- **Headers:**
-  - `Authorization`: `<jwt_token>` (The JWT token for the newly registered user)
-- **Body:** `"success"`
-- **Error Responses:**
-  - `400 Bad Request`: If registration fails due to invalid data or other registration issues.
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Authentication successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NDMwMDAwMC04ZjAzLTRhZmEtOGE1My00YmY3MzdiMDc2YzQiLCJleHAiOjE3NTI1MzA0MDIsImlhdCI6MTc1MTkyNTYwMn0.Rg7h3w...",
+    "expiresIn": 604800,
+    "tokenType": "Bearer"
+  }
+}
+```
+
+**Token Details:**
+- **Valid for:** 7 days (604800 seconds)
+- **Type:** Bearer
+- **Usage:** Include in all protected endpoint headers
+- **Storage:** Save securely (EncryptedSharedPreferences or Android Keystore)
 
 ---
 
-## 1.0.4 `POST /auth/getNewToken`
+### 1.3 Refresh Token (Before Expiration)
 
-**Description:** Issues a new JWT token for an authenticated user using their email and a valid OTP. This is typically used after `getOtp` and `authenticateUser` to obtain a fresh token.
+**Endpoint:** `POST /auth/refreshToken`
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/auth/getNewToken`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "email": "user@example.com",
-    "otp": "123456"
-  }
-  ```
-  * `email` (String): The user's email address.
-  * `otp` (String): The OTP received by the user.
+```json
+{
+  "email": "student@usiu.ac.ke"
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Headers:**
-  - `Authorization`: `<new_jwt_token>` (The new JWT token)
-- **Body:** `"success"`
-- **Error Responses:**
-  - `401 Unauthorized`: If the OTP is incorrect or has expired, or the user is not authenticated.
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Token refreshed",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiresIn": 604800,
+    "tokenType": "Bearer"
+  }
+}
+```
+
+**When to use:** Refresh token 1 day before expiration to maintain uninterrupted access
 
 ---
 
-## 1.0.5 `POST /auth/testEndpoint`
+## 2. USER REGISTRATION
 
-**Description:** A test endpoint to verify token validity and retrieve user information from the token. Requires a valid JWT in the Authorization header.
+### 2.1 Save User Profile
+
+**Endpoint:** `POST /auth/saveUser`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/auth/testEndpoint`
-- **Content-Type:** `application/json`
-- **Headers:**
-  - `Authorization`: `<jwt_token>`
-- **Body:** Not required.
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+254712345678",
+  "email": "john.doe@usiu.ac.ke",
+  "messagingToken": "eVjVKBpNvqk:APA91bG_xyz..."
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"Hello! <user_email>"`
-- **Error Responses:**
-  - `401 Unauthorized`: If the provided JWT token is invalid or expired.
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "User saved successfully",
+  "data": {
+    "id": "543aaaaa-8f03-4afa-8a53-4bf737b076c4",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@usiu.ac.ke",
+    "phoneNumber": "+254712345678",
+    "messagingToken": "eVjVKBpNvqk:APA91bG_xyz..."
+  }
+}
+```
+
+**Field Details:**
+- **firstName, lastName:** User's name
+- **phoneNumber:** Mobile number for contact
+- **email:** USIU email (verified via OTP)
+- **messagingToken:** FCM token for push notifications
 
 ---
 
-## 1.0.6 `POST /auth/submitMessagingToken`
+## 3. HOST WORKFLOW: CREATE CARPOOL TRIP
 
-**Description:** Submits or updates a user's Firebase Cloud Messaging (FCM) token. This token is used for sending push notifications to the user's device.
+### 3.1 Register Vehicle
+
+**Endpoint:** `POST /trips/registerVehicle`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/auth/submitMessagingToken`
-- **Content-Type:** `application/json`
-- **Headers:**
-  - `Authorization`: `<jwt_token>`
-- **Body:** `"your_fcm_messaging_token_here"`
-  * (String): The FCM token from the user's device.
+```json
+{
+  "make": "Toyota",
+  "model": "Prado",
+  "year": 2021,
+  "licensePlate": "KBZ 123AB",
+  "seatingCapacity": 4,
+  "color": "White"
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"Messaging token submitted"`
-- **Error Responses:**
-  - `401 Unauthorized`: If the provided JWT token is invalid or expired.
-  - `400 Bad Request`: If the messaging token is invalid or other submission issues occur.
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Vehicle registered successfully",
+  "data": {
+    "id": "vehicle-uuid-123",
+    "make": "Toyota",
+    "model": "Prado",
+    "year": 2021,
+    "licensePlate": "KBZ 123AB",
+    "seatingCapacity": 4,
+    "color": "White"
+  }
+}
+```
 
 ---
 
-# 1.1.0 Trip Management API
+### 3.2 Create Trip
 
-This section documents the trip management endpoints exposed by `TripManagementController` and the status codes returned by `TripManagementControllerExceptionHandlers`.
+**Endpoint:** `POST /trips/createTrip`
 
-> **Important:** The controller currently expects a header named `jwt` for trip endpoints. The route for vehicle registration is spelled `regidterVehicle` in code, so the documented path below matches the current implementation exactly.
-
-## 1.1.1 `POST /trips/regidterVehicle`
-
-**Description:** Registers a vehicle for the authenticated user.
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/trips/regidterVehicle`
-- **Headers:**
-  - `jwt`: `<jwt_token>`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "regNo": "KDA 123A",
-    "desc": "Blue Toyota Prius"
+```json
+{
+  "originLatitude": -1.2607,
+  "originLongitude": 36.8161,
+  "destinationLatitude": -1.3200,
+  "destinationLongitude": 36.7762,
+  "departureTime": "2026-07-11T14:30:00Z",
+  "vehicleId": "vehicle-uuid-123",
+  "costPerPassenger": 300,
+  "notes": "Highway route, comfortable AC"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "message": "Trip created successfully",
+  "data": {
+    "tripId": "trip-uuid-456",
+    "hostId": "user-uuid-789",
+    "hostName": "John Doe",
+    "hostPhone": "+254712345678",
+    "originLatitude": -1.2607,
+    "originLongitude": 36.8161,
+    "destinationLatitude": -1.3200,
+    "destinationLongitude": 36.7762,
+    "departureTime": "2026-07-11T14:30:00Z",
+    "costPerPassenger": 300,
+    "status": "OPEN",
+    "availableSeats": 3,
+    "totalSeats": 4,
+    "createdAt": "2026-07-11T10:00:00Z"
   }
-  ```
-  * `regNo` (String): Vehicle registration number.
-  * `desc` (String): Vehicle description.
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"Registered vehicle successfully"`
+**Field Details:**
+- **originLatitude/Longitude:** User clicked location on map
+- **destinationLatitude/Longitude:** User clicked destination on map
+- **departureTime:** ISO 8601 format
+- **costPerPassenger:** KES amount per passenger
+- **status:** Initially "OPEN"
+- **availableSeats:** Total capacity minus 1 (host seat)
 
-## 1.1.2 `POST /trips/createTrip`
+---
 
-**Description:** Creates a new trip for the authenticated host.
+## 4. SEEKER WORKFLOW: JOIN CARPOOL
+
+### 4.1 Search & Join Trip
+
+**Endpoint:** `POST /trips/joinCarPool`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
 
 **Request:**
-- **Method:** `POST`
-- **Path:** `/trips/createTrip`
-- **Headers:**
-  - `jwt`: `<jwt_token>`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "capacity": 3,
-    "departureTime": "2026-07-01T09:30:00",
-    "originDestinationCoordinates": {
-      "origin": { "latitude": -1.2921, "longitude": 36.8219 },
-      "destination": { "latitude": -1.2675, "longitude": 36.8113 }
-    }
+```json
+{
+  "originLatitude": -1.2607,
+  "originLongitude": 36.8161,
+  "destinationLatitude": -1.3200,
+  "destinationLongitude": 36.7762,
+  "departureTime": "2026-07-11T14:30:00Z"
+}
+```
+
+**Response Scenario A: Match Found (200 OK)**
+```json
+{
+  "success": true,
+  "message": "Successfully joined carpool",
+  "data": {
+    "tripId": "trip-uuid-456",
+    "hostId": "host-uuid-111",
+    "hostName": "John Doe",
+    "hostPhone": "+254712345678",
+    "status": "MATCHED",
+    "availableSeats": 2,
+    "totalSeats": 4,
+    "departureTime": "2026-07-11T14:30:00Z",
+    "costPerPassenger": 300,
+    "matchedAt": "2026-07-11T10:05:00Z"
   }
-  ```
-  * `capacity` (int): Number of passengers that can join the trip.
-  * `departureTime` (LocalDateTime): Scheduled departure time.
-  * `originDestinationCoordinates` (OriginDestination): Trip route coordinates.
+}
+```
 
-**Response:**
-- **Status:** `201 Created`
-- **Content-Type:** `text/plain`
-- **Body:** `"Trip Created Successfully"`
-
-**Error Responses:**
-- `403 Forbidden`: Returned when `CannotCreateTripException` is thrown.
-
-## 1.1.3 `POST /trips/cancelTrip`
-
-**Description:** Cancels the current user's active trip.
-
-**Request:**
-- **Method:** `POST`
-- **Path:** `/trips/cancelTrip`
-- **Headers:**
-  - `jwt`: `<jwt_token>`
-
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `text/plain`
-- **Body:** `"Trip Cancelled Successfully"`
-
-**Error Responses:**
-- `403 Forbidden`: Returned when `CannotCancelTripException` is thrown.
-
-## 1.1.4 `POST /trips/joinCarPool`
-
-**Description:** Matches the authenticated ride seeker to a trip and returns the updated trip record.
-
-**Request:**
-- **Method:** `POST`
-- **Path:** `/trips/joinCarPool`
-- **Headers:**
-  - `jwt`: `<jwt_token>`
-- **Content-Type:** `application/json`
-- **Body:**
-  ```json
-  {
-    "departureTime": "2026-07-01T09:30:00",
-    "rsOriginDestination": {
-      "origin": { "latitude": -1.2921, "longitude": 36.8219 },
-      "destination": { "latitude": -1.2675, "longitude": 36.8113 }
-    }
+**Response Scenario B: No Match - Added to Backlog (202 Accepted)**
+```json
+{
+  "success": true,
+  "message": "No matching trip found. Added to backlog queue",
+  "data": {
+    "backlogId": "backlog-uuid-789",
+    "status": "BACKLOG",
+    "originLatitude": -1.2607,
+    "originLongitude": 36.8161,
+    "destinationLatitude": -1.3200,
+    "destinationLongitude": 36.7762,
+    "departureTime": "2026-07-11T14:30:00Z",
+    "addedAt": "2026-07-11T10:05:00Z",
+    "message": "You will be notified when a matching trip is available"
   }
-  ```
-  * `departureTime` (LocalDateTime): Desired departure time.
-  * `rsOriginDestination` (OriginDestination): Ride-seeker route coordinates.
+}
+```
 
-**Response:**
-- **Status:** `200 OK`
-- **Content-Type:** `application/json`
-- **Body:** A serialized `Trip` object.
+**Matching Logic:**
+- System searches for trips with SAME destination zone
+- Checks within ±30 minute departure time window
+- If match found → User added to trip, gets notification
+- If no match → User added to backlog, waits for new trips in that zone
 
-The returned `Trip` entity currently includes these fields:
-- `tripId`
-- `users`
-- `vehicle`
-- `tripCapacity`
-- `tripStatus`
-- `originDestination`
-- `routePolyline`
-- `departureTime`
-- `createdBy`
-- `destinationZone`
+---
 
-**Error Responses:**
-- `100 Continue`: Returned when `NoAvailableTripException` is thrown.
+## 5. HOST WORKFLOW: CANCEL TRIP
+
+**Endpoint:** `POST /trips/cancelTrip`
+
+**Headers:**
+```
+Authorization: Bearer {token}
+```
+
+**Request:**
+No request body required. Endpoint identifies host from JWT token and cancels their OPEN trip.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Trip cancelled successfully",
+  "data": {
+    "tripId": "trip-uuid-456",
+    "status": "CANCELLED",
+    "cancelledAt": "2026-07-11T10:30:00Z",
+    "passengersNotified": 3
+  }
+}
+```
+
+**Error Response (403 Forbidden):**
+```json
+{
+  "success": false,
+  "message": "Cannot cancel trip. No open trip found or trip already cancelled",
+  "error": "FORBIDDEN",
+  "statusCode": 403
+}
+```
+
+**Side Effects:**
+- All passengers in trip notified via FCM
+- Passengers added to backlog for automatic future matching
+- Trip removed from available listings
+
+---
+
+## 6. REAL-TIME NOTIFICATIONS (FCM)
+
+### 6.1 Notification Types
+
+**Trip Matched Notification:**
+```json
+{
+  "title": "Carpool Match Found!",
+  "body": "John Doe is heading to Westlands. Join now!",
+  "type": "TRIP_MATCHED",
+  "tripId": "trip-uuid-456",
+  "hostName": "John Doe",
+  "hostPhone": "+254712345678",
+  "departureTime": "2026-07-11T14:30:00Z"
+}
+```
+
+**Passenger Joined Notification (to host):**
+```json
+{
+  "title": "New Passenger!",
+  "body": "Jane Smith joined your trip to Westlands",
+  "type": "PASSENGER_JOINED",
+  "tripId": "trip-uuid-456",
+  "passengerName": "Jane Smith",
+  "availableSeats": 2
+}
+```
+
+**Trip Cancelled Notification (to passengers):**
+```json
+{
+  "title": "Trip Cancelled",
+  "body": "John Doe cancelled the trip to Westlands",
+  "type": "TRIP_CANCELLED",
+  "tripId": "trip-uuid-456",
+  "cancellationReason": "Vehicle breakdown"
+}
+```
+
+---
+
+## 7. ERROR CODES & RESPONSES
+
+| Status | Scenario | Example |
+|--------|----------|---------|
+| **200** | Success | OTP verified, trip created, user joined |
+| **201** | Created | Trip successfully created |
+| **202** | Accepted | Seeker added to backlog (no match) |
+| **400** | Bad Request | Invalid email, missing fields, malformed JSON |
+| **401** | Unauthorized | Token expired, invalid token, missing auth header |
+| **403** | Forbidden | Non-USIU email, email not verified |
+| **404** | Not Found | Trip doesn't exist, vehicle doesn't exist |
+| **409** | Conflict | Trip already full, vehicle already registered |
+| **500** | Server Error | Database error, external API failure |
+
+**Example Error Response:**
+```json
+{
+  "success": false,
+  "message": "Token expired. Please refresh or login again",
+  "error": "UNAUTHORIZED",
+  "statusCode": 401
+}
+```
+
+---
+
+## 8. IMPLEMENTATION CHECKLIST
+
+### Authentication Setup
+- [ ] Display email input screen
+- [ ] Call `/auth/getOtp` when user submits email
+- [ ] Display OTP input screen
+- [ ] Call `/auth/getNewToken` when user submits OTP
+- [ ] Store JWT token securely
+- [ ] Add `Authorization: Bearer {token}` to all subsequent requests
+
+### User Registration
+- [ ] Display user profile form (firstName, lastName, phone)
+- [ ] Get FCM token from Firebase
+- [ ] Call `/auth/saveUser` with profile + FCM token
+
+### Host Flow
+- [ ] Display vehicle registration form
+- [ ] Call `/trips/registerVehicle`
+- [ ] Display map UI for origin/destination selection
+- [ ] Call `/trips/createTrip` with map coordinates
+- [ ] Listen for FCM notifications (passenger joined, cancellations)
+
+### Seeker Flow
+- [ ] Display map UI for origin/destination selection
+- [ ] Call `/trips/joinCarPool` with map coordinates
+- [ ] Handle two response types:
+  - **Matched** → Show trip details, host info
+  - **Backlog** → Show "waiting for match" message
+- [ ] Listen for FCM notifications (trip matched, trip cancelled)
+
+---
+
+## 9. TESTING THE ENDPOINTS
+
+### Using cURL
+
+```bash
+# 1. Request OTP
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/auth/getOtp \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@usiu.ac.ke"}'
+
+# 2. Verify OTP (replace TOKEN with actual JWT)
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/auth/getNewToken \
+  -H "Content-Type: application/json" \
+  -d '{"email":"student@usiu.ac.ke","otp":123456}'
+
+# 3. Save User Profile (include token)
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/auth/saveUser \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName":"John",
+    "lastName":"Doe",
+    "phoneNumber":"+254712345678",
+    "email":"student@usiu.ac.ke",
+    "messagingToken":"FCM_TOKEN_HERE"
+  }'
+
+# 4. Register Vehicle
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/trips/registerVehicle \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "make":"Toyota",
+    "model":"Prado",
+    "year":2021,
+    "licensePlate":"KBZ 123AB",
+    "seatingCapacity":4,
+    "color":"White"
+  }'
+
+# 5. Create Trip
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/trips/createTrip \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "originLatitude":-1.2607,
+    "originLongitude":36.8161,
+    "destinationLatitude":-1.3200,
+    "destinationLongitude":36.7762,
+    "departureTime":"2026-07-11T14:30:00Z",
+    "vehicleId":"YOUR_VEHICLE_ID",
+    "costPerPassenger":300,
+    "notes":"Comfortable AC"
+  }'
+
+# 6. Join Carpool
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/trips/joinCarPool \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "originLatitude":-1.2607,
+    "originLongitude":36.8161,
+    "destinationLatitude":-1.3200,
+    "destinationLongitude":36.7762,
+    "departureTime":"2026-07-11T14:30:00Z"
+  }'
+
+# 7. Cancel Trip (no request body, token only)
+curl -X POST https://swooprserver-373496068484.europe-west1.run.app/trips/cancelTrip \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+---
+
+## 10. IMPORTANT NOTES
+
+✅ **Map Coordinates:** Latitude/Longitude from map UI clicks go directly to OTP and trip creation endpoints
+
+✅ **FCM Integration:** Already working - tokens are sent with `/auth/saveUser` and used for notifications
+
+✅ **Token Management:** Store token securely, refresh before 7-day expiration
+
+✅ **Error Handling:** Always check `success` field in response, not just HTTP status code
+
+✅ **Backlog Flow:** Automatic - when new trips created, system auto-matches backlog users
+
+✅ **Real-Time Updates:** Use FCM for notifications, poll `/trips/getTripDetails` for status if needed
+
+✅ **Map Coordinates Format:** Standard latitude/longitude decimal degrees (e.g., -1.2607)
+
+---
+
+**Last Updated:** July 11, 2026  
+**Status:** Live on GCP Cloud Run  
+**Base URL:** `https://swooprserver-373496068484.europe-west1.run.app`
+

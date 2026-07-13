@@ -1,19 +1,19 @@
-package com.example.carpoolclient.auth.dtos;
+package com.example.carpoolclient.dtos;
 
 public class AuthenticateRequest {
-    private String otp;
+    private int otp;
     private String email;
 
-    public AuthenticateRequest(String otp, String email) {
+    public AuthenticateRequest(int otp, String email) {
         this.otp = otp;
         this.email = email;
     }
 
-    public String getOtp() {
+    public int getOtp() {
         return otp;
     }
 
-    public void setOtp(String otp) {
+    public void setOtp(int otp) {
         this.otp = otp;
     }
 

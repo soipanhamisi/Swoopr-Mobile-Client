@@ -1,4 +1,4 @@
-package com.example.carpoolclient.tripManagement;
+package com.example.carpoolclient.dtos;
 
 public class Coordinates {
     private double latitude;

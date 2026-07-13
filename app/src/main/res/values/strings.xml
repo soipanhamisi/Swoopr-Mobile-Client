@@ -22,7 +22,7 @@
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="finish_button">Finish</string>
     <string name="loading">Loading...</string>
-    <string name="google_maps_key">AIzaSyAdvu5x0-Dqvbx8du8Oh0fWRCFYXOIQ5</string>
+    <string name="google_maps_key">AIzaSyC4WJoje1kjxhoiTQMs8RRJf7vTJa-Anmo</string>
     <string name="trip_map_title">Select Destination</string>
     <string name="trip_select_destination_hint">Tap on the map to choose your destination</string>
     <string name="trip_join_carpool">Join Carpool</string>
@@ -30,5 +30,14 @@
     <string name="trip_destination_required">Please select a destination on the map.</string>
     <string name="trip_origin_unavailable">Unable to fetch your current location. Turn on location and try again.</string>
     <string name="trip_join_success">Trip match request submitted successfully.</string>
+    <string name="trip_create_trip">Create Trip</string>
+    <string name="trip_cancel_trip">Cancel Trip</string>
+    <string name="trip_hint_select_action">Select an action from the side menu</string>
+    <string name="trip_hint_select_origin">Tap the map to set your starting point</string>
+    <string name="trip_hint_select_destination">Now select your destination on the map</string>
+    <string name="trip_hint_confirm">Coordinates selected. Click confirm to proceed.</string>
+    <string name="trip_confirm_button">Confirm</string>
+    <string name="trip_origin_label">Origin: </string>
+    <string name="trip_dest_label">Dest: </string>
     <string name="verifyEmailOption">have an account? Verify Email Here</string>
 </resources>

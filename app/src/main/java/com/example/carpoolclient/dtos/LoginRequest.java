@@ -1,4 +1,4 @@
-package com.example.carpoolclient.auth.dtos;
+package com.example.carpoolclient.dtos;
 
 public class LoginRequest {
     private String email;

@@ -1,30 +1,27 @@
-package com.example.carpoolclient.auth.activities;
+package com.example.carpoolclient;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.carpoolclient.R;
-import com.example.carpoolclient.auth.services.AuthService;
-import com.example.carpoolclient.auth.storage.SecureTokenStore;
-import com.example.carpoolclient.tripManagement.MainMapActivity;
+import com.example.carpoolclient.utils.SecureTokenStore;
+import com.example.carpoolclient.utils.WebClient;
+import com.google.firebase.messaging.FirebaseMessaging;
 
-public class LandingActivity extends AppCompatActivity {
+public class LandingPageActivity extends AppCompatActivity {
     private SecureTokenStore tokenStore;
-    private AuthService authService;
+    private WebClient webClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        android.util.Log.e("TOKEN_CHECK", "!!! LANDING ACTIVITY CREATED !!!");
+        android.util.Log.e("landing_activity", "!!! LANDING ACTIVITY CREATED !!!");
         setContentView(R.layout.activity_landing);
-
         tokenStore = SecureTokenStore.getInstance(this);
-        authService = new AuthService(this);
+        webClient = new WebClient(this);
 
-        // Explicitly fetch and log the token as an ERROR so it stands out in red
-        com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
+        FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
                         android.util.Log.e("TOKEN_CHECK", "FAILED TO GET TOKEN: " + task.getException());
@@ -40,10 +37,13 @@ public class LandingActivity extends AppCompatActivity {
         handleStartupRouting();
 
         findViewById(R.id.btn_get_started).setOnClickListener(v ->
-                startActivity(new Intent(this, EmailVerification.class)));
+                startActivity(new Intent(this, EmailVerificationActivity.class)));
 
-        findViewById(R.id.btn_verifyEmail).setOnClickListener(v ->
-                startActivity(new Intent(this, EmailVerification.class)));
+        findViewById(R.id.btn_verifyEmail).setOnClickListener(v -> {
+            Intent intent = new Intent(this, EmailVerificationActivity.class);
+            intent.putExtra("REFRESH_TOKEN", true);
+            startActivity(intent);
+        });
     }
 
     private void handleStartupRouting() {
@@ -51,19 +51,15 @@ public class LandingActivity extends AppCompatActivity {
         if (jwt == null || jwt.trim().isEmpty()) {
             return;
         }
+        testJwt(jwt);
+    }
 
-        authService.testEndpoint(jwt, (success, message) -> runOnUiThread(() -> {
+    private void testJwt(String jwt) {
+        webClient.post("/auth/testEndpoint", String.class, (success, message, data) -> {
             if (success) {
                 navigateToMainMap();
-                return;
             }
-
-            tokenStore.saveJwtToken(null);
-            Intent intent = new Intent(this, EmailVerification.class);
-            intent.putExtra("REFRESH_TOKEN", true);
-            startActivity(intent);
-            finish();
-        }));
+        });
     }
 
     private void navigateToMainMap() {

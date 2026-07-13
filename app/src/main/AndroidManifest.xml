@@ -20,7 +20,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".auth.activities.LandingActivity"
+            android:name=".LandingPageActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,23 +29,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".auth.activities.RegisterActivity"
+            android:name=".RegisterActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".auth.activities.EmailVerification"
+            android:name=".EmailVerificationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".auth.activities.OtpVerificationActivity"
+            android:name=".OtpVerificationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <service
-            android:name=".FireBaseMessaging"
+            android:name=".utils.FireBaseMessaging"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -53,7 +53,11 @@
         </service>
 
         <activity
-            android:name=".tripManagement.MainMapActivity"
+            android:name=".MainMapActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".RegisterVehicleActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>

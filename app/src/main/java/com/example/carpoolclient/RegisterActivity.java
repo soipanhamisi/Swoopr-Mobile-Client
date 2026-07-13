@@ -1,4 +1,4 @@
-package com.example.carpoolclient.auth.activities;
+package com.example.carpoolclient;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,15 +13,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.carpoolclient.R;
-import com.example.carpoolclient.auth.dtos.RegisterRequest;
-import com.example.carpoolclient.auth.services.AuthService;
-import com.example.carpoolclient.tripManagement.MainMapActivity;
+import com.example.carpoolclient.dtos.UserDto;
 import com.example.carpoolclient.utils.LoadingDialog;
+import com.example.carpoolclient.utils.WebClient;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class RegisterActivity extends AppCompatActivity {
-    private AuthService authService;
     private LoadingDialog loadingDialog;
+    private WebClient webClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_register);
 
-        authService = new AuthService(this);
+        webClient = new WebClient(this);
         loadingDialog = new LoadingDialog(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -72,43 +71,37 @@ public class RegisterActivity extends AppCompatActivity {
                 return;
             }
 
-
-            RegisterRequest registerRequest = new RegisterRequest(
-                    firstName,
-                    lastName,
-                    finalEmail,
-                    phoneNumber,
-                    studentId
-            );
-
             btnFinish.setEnabled(false);
             loadingDialog.show();
-            authService.registerUser(registerRequest, (success, message) -> runOnUiThread(() -> {
-                if (success) {
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                    authService.sendMessagingToken((tokenSuccess, tokenMessage) -> runOnUiThread(() -> {
-                        btnFinish.setEnabled(true);
-                        loadingDialog.dismiss();
 
-                        if (!tokenSuccess) {
-                            Toast.makeText(this, "Failed to submit messaging token: " + tokenMessage, Toast.LENGTH_SHORT).show();
-                        }
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                String fcmToken = task.isSuccessful() ? task.getResult() : null;
+                String fullName = firstName + " " + lastName;
+                UserDto userDto = new UserDto(fullName, finalEmail, "NORMAL_USER", fcmToken);
 
-                        Intent intent = new Intent(this, MainMapActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    }));
-                } else {
+                webClient.post("/auth/saveUser", userDto, Void.class, (success, message, data) -> {
                     btnFinish.setEnabled(true);
                     loadingDialog.dismiss();
-                    String displayMessage = message != null && message.toLowerCase().contains("user exists")
-                            ? "Account already registered"
-                            : message;
-                    Toast.makeText(this, "Registration failed: " + displayMessage, Toast.LENGTH_LONG).show();
-                }
-            }));
+
+                    if (success) {
+                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                        navigateToMainMap();
+                    } else {
+                        String displayMessage = message != null && message.toLowerCase().contains("user exists")
+                                ? "Account already registered"
+                                : message;
+                        Toast.makeText(this, "Registration failed: " + displayMessage, Toast.LENGTH_LONG).show();
+                    }
+                });
+            });
         });
+    }
+
+    private void navigateToMainMap() {
+        Intent intent = new Intent(this, MainMapActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
 
