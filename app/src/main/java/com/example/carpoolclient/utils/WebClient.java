@@ -179,8 +179,8 @@ public class WebClient {
                         android.util.Log.e("inbound_json", "Logging failed", e);
                     }
 
-                    // Automatic token refresh on 403 Forbidden with token-related errors
-                    if (res.code() == 403 && !isRetry && !request.url().encodedPath().contains("/auth/refreshToken")) {
+                    // Automatic token refresh on 401/403 Forbidden/Unauthorized with token-related errors
+                    if ((res.code() == 403 || res.code() == 401) && !isRetry && !request.url().encodedPath().contains("/auth/refreshToken")) {
                         if (isTokenError(bodyString)) {
                             android.util.Log.d("WebClient", "Token expired/invalid. Attempting transparent refresh...");
                             performTokenRefreshAndRetry(request, responseType, expectApiResponse, callback);

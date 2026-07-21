@@ -1,0 +1,6 @@
+- [x] Implement Resend OTP in `OtpVerificationActivity.java`
+    - [x] Add missing imports (`Toast`, `EmailDto`)
+    - [x] Set `OnClickListener` for `tvResendOtp`
+    - [x] Implement `resendOtp` method
+- [x] Verify changes
+    - [x] Run `gradle build`

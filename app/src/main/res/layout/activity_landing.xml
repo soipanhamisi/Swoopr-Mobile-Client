@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/earthy_dark_background">
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_verifyEmail"
-        android:layout_width="201dp"
-        android:layout_height="26dp"
+        android:layout_width="212dp"
+        android:layout_height="48dp"
         android:layout_margin="32dp"
         android:background="@drawable/rounded_button"
         android:backgroundTint="@color/earthy_dark_on_secondary"
@@ -17,7 +16,7 @@
         android:text="@string/verifyEmailOption"
         android:textAllCaps="false"
         android:textColor="@color/earthy_dark_primary"
-        android:textSize="10sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
