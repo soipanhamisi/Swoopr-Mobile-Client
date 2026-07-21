@@ -1,3 +1,0 @@
-- `[x]` Relocate `WebClient.md` to `app/WebClient.md`
-- `[x]` Verify the new file location
-- `[x]` Remove the old documentation file from the Java source directory
