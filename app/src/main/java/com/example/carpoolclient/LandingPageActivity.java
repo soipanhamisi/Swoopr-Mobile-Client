@@ -48,6 +48,15 @@ public class LandingPageActivity extends AppCompatActivity {
             webClient.post("/auth/testEndpoint", null, Void.class, (success, message, data) -> {
                 if (success) {
                     globalContext.setRegistered(true);
+
+                    // Submit FCM token after acquiring Bearer token (via auto-login success)
+                    String fcmToken = tokenStore.getFcmToken();
+                    if (fcmToken != null) {
+                        webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                            if (s) Log.i("landing_activity", "FCM token submitted successfully");
+                        });
+                    }
+
                     Intent intent = new Intent(this, MainMapActivity.class);
                     startActivity(intent);
                     finish();
@@ -91,17 +100,6 @@ public class LandingPageActivity extends AppCompatActivity {
                     }
                     String token = task.getResult();
                     tokenStore.saveFcmToken(token);
-                    
-                    webClient.post("/auth/submitMessagingToken",
-                            token,
-                            Void.class,
-                            (success, message, data) -> {
-                                if (success) {
-                                    Log.i("landing_activity", "FCM token submitted successfully");
-                                } else {
-                                    Log.e("landing_activity", "FCM token submission failed: " + message);
-                                }
-                            });
                 });
     }
 

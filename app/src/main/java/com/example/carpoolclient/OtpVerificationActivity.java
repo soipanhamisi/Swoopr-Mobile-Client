@@ -24,14 +24,17 @@ import com.example.carpoolclient.utils.WebClient;
 public class OtpVerificationActivity extends AppCompatActivity {
     private static final int OTP_LENGTH = 3;
 
-    private WebClient webClient = new WebClient(this);;
-    private LoadingDialog loadingDialog =  new LoadingDialog(this);;
+    private WebClient webClient;
+    private LoadingDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_otp_verification);
+
+        webClient = new WebClient(this);
+        loadingDialog = new LoadingDialog(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -92,9 +95,14 @@ public class OtpVerificationActivity extends AppCompatActivity {
                 TokenResponse.class,
                 (success, message, data) -> {
                     loadingDialog.dismiss();
-                    if (success && data != null) {
-                        TokenResponse tokenResponse = (TokenResponse) data;
-                        SecureTokenStore.getInstance(this).saveJwtToken(tokenResponse.getToken());
+                    if (success) {
+                        // Submit FCM token after acquiring Bearer token
+                        String fcmToken = SecureTokenStore.getInstance(this).getFcmToken();
+                        if (fcmToken != null) {
+                            webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                                if (s) android.util.Log.i("otp_verification", "FCM token submitted successfully");
+                            });
+                        }
 
                         GlobalContext globalContext = (GlobalContext) getApplication();
                         if (globalContext.isRegistered()) {
@@ -119,7 +127,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
         loadingDialog.show();
         EmailDto emailDto = new EmailDto();
         emailDto.setEmail(email);
-        webClient.post("auth/getOtp",
+        webClient.post("/auth/getOtp",
                 emailDto,
                 Void.class,
                 (success, message, data) -> {

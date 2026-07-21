@@ -85,12 +85,30 @@ public class RegisterActivity extends AppCompatActivity {
 
                     if (success) {
                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                        
+                        // Submit FCM token after acquiring Bearer token
+                        if (fcmToken != null) {
+                            webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                                if (s) android.util.Log.i("register_activity", "FCM token submitted successfully");
+                            });
+                        }
+                        
                         navigateToMainMap();
                     } else {
-                        String displayMessage = message != null && message.toLowerCase().contains("user exists")
-                                ? "Account already registered"
-                                : message;
-                        Toast.makeText(this, "Registration failed: " + displayMessage, Toast.LENGTH_LONG).show();
+                        boolean userExists = message != null && (message.toLowerCase().contains("user exists") || message.toLowerCase().contains("already registered"));
+                        if (userExists) {
+                            // Submit FCM token after acquiring Bearer token (via successful auth fallback)
+                            if (fcmToken != null) {
+                                webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                                    if (s) android.util.Log.i("register_activity", "FCM token submitted successfully (fallback)");
+                                });
+                            }
+                            
+                            Toast.makeText(this, "Account already registered. Logging you in...", Toast.LENGTH_SHORT).show();
+                            navigateToMainMap();
+                        } else {
+                            Toast.makeText(this, "Registration failed: " + message, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
             });

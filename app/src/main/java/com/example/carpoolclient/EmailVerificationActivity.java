@@ -18,14 +18,17 @@ import com.example.carpoolclient.utils.LoadingDialog;
 import com.example.carpoolclient.utils.WebClient;
 
 public class EmailVerificationActivity extends AppCompatActivity {
-    private LoadingDialog loadingDialog = new LoadingDialog(this);
-    private WebClient webClient = new WebClient(this);;
+    private LoadingDialog loadingDialog;
+    private WebClient webClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_email_verification);
+
+        loadingDialog = new LoadingDialog(this);
+        webClient = new WebClient(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -52,7 +55,7 @@ public class EmailVerificationActivity extends AppCompatActivity {
         loadingDialog.show();
         EmailDto emailDto = new EmailDto();
         emailDto.setEmail(email);
-        webClient.post("auth/getOtp",
+        webClient.post("/auth/getOtp",
                 emailDto,
                 Void.class,
                 (success, message, data) -> {

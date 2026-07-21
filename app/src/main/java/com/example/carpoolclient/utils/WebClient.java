@@ -64,11 +64,19 @@ public class WebClient {
         RequestBody body = RequestBody.create(jsonPayload, JSON);
 
         Request.Builder builder = new Request.Builder()
-                .url(BASE_URL + endpoint)
+                .url(getFullUrl(endpoint))
                 .post(body);
 
         addAuthHeader(builder);
         execute(builder.build(), responseType, expectApiResponse, callback);
+    }
+
+    private String getFullUrl(String endpoint) {
+        if (endpoint.startsWith("http")) return endpoint;
+        String baseUrl = BASE_URL;
+        if (!baseUrl.endsWith("/")) baseUrl += "/";
+        if (endpoint.startsWith("/")) endpoint = endpoint.substring(1);
+        return baseUrl + endpoint;
     }
 
     public <T> void post(String endpoint, Object requestData, Class<T> responseDataType, WebCallback<T> callback) {
@@ -84,7 +92,7 @@ public class WebClient {
      */
     public <T> void get(String endpoint, Class<T> responseDataType, WebCallback<T> callback) {
         Request.Builder builder = new Request.Builder()
-                .url(BASE_URL + endpoint)
+                .url(getFullUrl(endpoint))
                 .get();
 
         addAuthHeader(builder);
