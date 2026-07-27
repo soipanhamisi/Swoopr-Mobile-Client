@@ -2,7 +2,14 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.CarpoolClient" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/earthy_dark_primary</item>
+        <item name="colorSecondary">@color/earthy_dark_secondary</item>
+        <item name="android:windowBackground">@color/earthy_dark_background</item>
+        <item name="colorSurface">@color/earthy_dark_surface</item>
+        <item name="colorOnPrimary">@color/earthy_dark_on_primary</item>
+        <item name="colorOnSecondary">@color/earthy_dark_on_secondary</item>
+        <item name="android:textColorPrimary">@color/earthy_dark_text_primary</item>
+        <item name="android:textColorSecondary">@color/earthy_dark_text_secondary</item>
     </style>
 
     <style name="Theme.CarpoolClient" parent="Base.Theme.CarpoolClient" />

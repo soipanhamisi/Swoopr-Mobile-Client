@@ -58,6 +58,13 @@
             android:name=".RegisterVehicleActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".CreateCarpoolActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ConfirmCarpoolActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

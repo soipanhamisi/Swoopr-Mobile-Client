@@ -4,31 +4,27 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
-import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.carpoolclient.dtos.Coordinates;
 import com.example.carpoolclient.dtos.JoinCarpoolDto;
-import com.example.carpoolclient.dtos.TripData;
+import com.example.carpoolclient.dtos.PendingTripDto;
 import com.example.carpoolclient.dtos.VehicleDto;
 import com.example.carpoolclient.utils.WebClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,16 +35,19 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 
-public class MainMapActivity extends AppCompatActivity implements OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
+public class MainMapActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final float DEFAULT_ZOOM = 14f;
 
     private enum SelectionState { NONE, SELECTING_ORIGIN, SELECTING_DESTINATION }
@@ -60,14 +59,18 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     private Coordinates selectedOrigin;
     private Coordinates selectedDestination;
     
-    private DrawerLayout drawerLayout;
+    private BottomSheetBehavior<View> bottomSheetBehavior;
     private TextView tvHint;
     private TextView tvSelectionDetails;
+    private TextView tvGreeting;
+    private TextView tvTripStart;
+    private TextView tvTripDest;
+    private TextView tvDashboardTrip;
     private Button btnConfirm;
+    private FloatingActionButton btnMyLocation;
     
     private SelectionState selectionState = SelectionState.NONE;
     private ActionType currentAction = ActionType.NONE;
-    private boolean pendingTripCreationAfterVehicleRegistration = false;
 
     private WebClient webClient;
 
@@ -86,22 +89,53 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main_map_acitvity);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        View bottomSheet = findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        btnMyLocation = findViewById(R.id.btn_my_location);
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        btnMyLocation.setOnClickListener(v -> {
+            if (googleMap != null) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    fineLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+                } else {
+                    googleMap.setMyLocationEnabled(true);
+                    android.location.Location location = googleMap.getMyLocation();
+                    if (location != null) {
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+                    } else {
+                        Toast.makeText(this, "Wait, fetching your location...", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        });
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-                R.string.app_name, R.string.app_name);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        findViewById(R.id.btn_nav_join).setOnClickListener(v -> {
+            startSelectionProcess(ActionType.JOIN);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+        findViewById(R.id.btn_nav_create).setOnClickListener(v -> {
+            startActivity(new Intent(this, CreateCarpoolActivity.class));
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+        findViewById(R.id.btn_register_vehicle).setOnClickListener(v -> {
+            Intent intent = new Intent(this, RegisterVehicleActivity.class);
+            startActivity(intent);
+        });
+        findViewById(R.id.btn_nav_cancel).setOnClickListener(v -> {
+            cancelCurrentTrip();
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
 
         webClient = new WebClient(this);
 
         tvHint = findViewById(R.id.tv_hint);
         tvSelectionDetails = findViewById(R.id.tv_selection_details);
+        tvGreeting = findViewById(R.id.tv_greeting);
+        tvTripStart = findViewById(R.id.tv_trip_start);
+        tvTripDest = findViewById(R.id.tv_trip_dest);
+        tvDashboardTrip = findViewById(R.id.tv_dashboard_trip);
         btnConfirm = findViewById(R.id.btn_confirm_selection);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
@@ -114,19 +148,24 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             handleConfirmation();
         });
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        View logo = findViewById(R.id.img_logo_map);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
+            
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) logo.getLayoutParams();
+            lp.topMargin = systemBars.top + (int)(24 * getResources().getDisplayMetrics().density);
+            logo.setLayoutParams(lp);
+            
             return insets;
         });
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    drawerLayout.closeDrawer(GravityCompat.START);
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else if (selectionState == SelectionState.SELECTING_DESTINATION) {
-                    // Go back to selecting origin
                     selectionState = SelectionState.SELECTING_ORIGIN;
                     if (destinationMarker != null) destinationMarker.remove();
                     selectedDestination = null;
@@ -134,7 +173,6 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
                     tvHint.setText(R.string.trip_hint_select_origin);
                     updateSelectionDetails();
                 } else if (selectionState == SelectionState.SELECTING_ORIGIN) {
-                    // Cancel selection and go back to initial state
                     resetToInitialState();
                 } else {
                     setEnabled(false);
@@ -147,17 +185,79 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     protected void onResume() {
         super.onResume();
-        if (pendingTripCreationAfterVehicleRegistration) {
-            pendingTripCreationAfterVehicleRegistration = false;
-            startSelectionProcess(ActionType.CREATE);
+        fetchDashboardData();
+    }
+
+    private void fetchDashboardData() {
+        // Update greeting
+        String name = ((GlobalContext) getApplication()).getFullName();
+        if (name != null && !name.isEmpty()) {
+            tvGreeting.setText("Hello " + name + "...");
+        } else {
+            tvGreeting.setText("Hello User...");
+        }
+
+        // 1. Scheduled Trips
+        webClient.get("/trips/queryPendingTrips", PendingTripDto.class, (success, message, data) -> {
+            View card = findViewById(R.id.card_pending_trip);
+            if (success && data != null) {
+                PendingTripDto trip = (PendingTripDto) data;
+                card.setVisibility(View.VISIBLE);
+                
+                // Populating with available data
+                tvTripStart.setText("Departure: " + formatDateTime(trip.getTripData().getDepartureTime()));
+                tvTripDest.setText("Capacity: " + trip.getTripData().getCapacity());
+                
+                if (trip.getCarpoolMemberNames() != null && !trip.getCarpoolMemberNames().isEmpty()) {
+                    tvDashboardTrip.setText(String.join("\n", trip.getCarpoolMemberNames()));
+                } else {
+                    tvDashboardTrip.setText("No other members");
+                }
+            } else {
+                // If no pending trip, we could either hide the card or show a "No trips" state
+                // Based on the overhaul, let's keep it visible but show empty state or hide it.
+                // For now, let's hide it if no data.
+                card.setVisibility(View.GONE);
+            }
+        });
+
+        // 2. Registered Vehicles
+        Type listType = new TypeToken<List<VehicleDto>>(){}.getType();
+        webClient.get("/trips/queryRegisteredVehicle", listType, true, (success, message, data) -> {
+            // Data fetched, can be used for other UI elements if needed
+        });
+    }
+
+    private String formatDateTime(String isoString) {
+        if (isoString == null || isoString.isEmpty()) return "";
+        try {
+            // Endpoints return ISO 8601 like 2026-07-23T12:54:44.916005
+            // SimpleDateFormat works best with a truncated string if there are many fractional digits
+            String partToParse = isoString.split("\\.")[0]; // "2026-07-23T12:54:44"
+            
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+            parser.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = parser.parse(partToParse);
+            
+            if (date == null) return isoString;
+            
+            SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, hh:mm a", Locale.US);
+            return formatter.format(date);
+        } catch (Exception e) {
+            return isoString;
         }
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false); // Disable default button
         googleMap.setOnMapClickListener(this::handleMapClick);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-1.286389, 36.817223), DEFAULT_ZOOM));
+        
+        // Remove padding since drawer is hidden
+        googleMap.setPadding(0, 0, 0, 0);
+        
         enableMyLocationOnMap();
     }
 
@@ -205,73 +305,6 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         tvSelectionDetails.setText(sb.toString());
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        
-        if (id == R.id.nav_join) {
-            startSelectionProcess(ActionType.JOIN);
-        } else if (id == R.id.nav_create) {
-            checkVehiclesBeforeCreatingTrip();
-        } else if (id == R.id.nav_cancel) {
-            cancelCurrentTrip();
-        }
-
-        drawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
-
-    private void checkVehiclesBeforeCreatingTrip() {
-        Type listType = new TypeToken<List<VehicleDto>>(){}.getType();
-        webClient.post("/trips/queryRegisteredVehicle", null, listType, false, (success, message, data) -> {
-            if (success && data != null) {
-                List<VehicleDto> vehicles = (List<VehicleDto>) data;
-                if (vehicles.isEmpty()) {
-                    showNoVehiclesDialog();
-                } else {
-                    showVehicleSelectionDialog(vehicles);
-                }
-            } else {
-                Toast.makeText(this, "Failed to fetch vehicles: " + message, Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void showNoVehiclesDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("No Vehicles Found")
-                .setMessage("You need to register a vehicle before you can create a trip.")
-                .setPositiveButton("Register Now", (dialog, which) -> {
-                    pendingTripCreationAfterVehicleRegistration = true;
-                    startActivity(new Intent(this, RegisterVehicleActivity.class));
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
-    private void showVehicleSelectionDialog(List<VehicleDto> vehicles) {
-        String[] vehicleNames = new String[vehicles.size() + 1];
-        for (int i = 0; i < vehicles.size(); i++) {
-            vehicleNames[i] = vehicles.get(i).getRegNo() + " (" + vehicles.get(i).getDesc() + ")";
-        }
-        vehicleNames[vehicles.size()] = "Register a new vehicle...";
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select Vehicle")
-                .setItems(vehicleNames, (dialog, which) -> {
-                    if (which == vehicles.size()) {
-                        pendingTripCreationAfterVehicleRegistration = true;
-                        startActivity(new Intent(this, RegisterVehicleActivity.class));
-                    } else {
-                        // Selected a vehicle
-                        Toast.makeText(this, "Vehicle selected: " + vehicles.get(which).getRegNo(), Toast.LENGTH_SHORT).show();
-                        startSelectionProcess(ActionType.CREATE);
-                    }
-                })
-                .show();
-    }
-
-
     private void startSelectionProcess(ActionType action) {
         currentAction = action;
         selectionState = SelectionState.SELECTING_ORIGIN;
@@ -296,13 +329,12 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             return;
         }
 
-        if (currentAction == ActionType.CREATE) {
-            submitCreateRequest(selectedOrigin.getLatitude(), selectedOrigin.getLongitude());
-        } else if (currentAction == ActionType.JOIN) {
+        if (currentAction == ActionType.JOIN) {
             submitJoinRequest(selectedOrigin.getLatitude(), selectedOrigin.getLongitude());
         } else {
             android.util.Log.w("MainMapActivity", "Confirm clicked but no action selected");
-            Toast.makeText(this, "Please select an action from the menu first", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select an action from the bottom drawer first", Toast.LENGTH_SHORT).show();
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
 
@@ -311,28 +343,6 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             if (success) {
                 resetToInitialState();
-            }
-        });
-    }
-
-    private void submitCreateRequest(double originLat, double originLng) {
-        TripData request = new TripData();
-        request.setCapacity(4);
-        request.setDepartureTime("2026-07-13T08:00:00");
-        
-        TripData.OriginDestinationCoordinates coords = new TripData.OriginDestinationCoordinates();
-        coords.setOriginLatitude(originLat);
-        coords.setOriginLongitude(originLng);
-        coords.setDestinationLatitude(selectedDestination.getLatitude());
-        coords.setDestinationLongitude(selectedDestination.getLongitude());
-        request.setOriginDestinationCoordinates(coords);
-
-        webClient.post("/trips/createTrip", request, Void.class, (success, message, data) -> {
-            if (success) {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-                resetToInitialState();
-            } else {
-                handleGeofenceError(message);
             }
         });
     }
@@ -367,14 +377,10 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             return;
         }
 
-        // If the error is likely due to USIU geofence block
         new AlertDialog.Builder(this)
                 .setTitle("Location Blocked")
                 .setMessage(message + "\n\nEither origin or destination must be within the USIU geofence. Please reselect your coordinates.")
-                .setPositiveButton("Reselect", (dialog, which) -> {
-                    // Stay in current selection state but allow re-clicking/tweaking
-                    // User can use back button or just click on map again to fix it.
-                })
+                .setPositiveButton("Reselect", null)
                 .setNegativeButton("Cancel", (dialog, which) -> resetToInitialState())
                 .show();
     }
@@ -386,6 +392,8 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         btnConfirm.setVisibility(View.GONE);
         tvHint.setText(R.string.trip_hint_select_action);
         tvSelectionDetails.setText("");
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        fetchDashboardData();
     }
 
     private void enableMyLocationOnMap() {

@@ -1,22 +1,20 @@
 package com.example.carpoolclient;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.dtos.VehicleDto;
 import com.example.carpoolclient.utils.WebClient;
-import com.google.android.material.textfield.TextInputEditText;
 
 public class RegisterVehicleActivity extends AppCompatActivity {
 
-    private TextInputEditText etRegNo, etDesc;
+    private EditText etRegNo, etDesc;
     private Button btnRegister;
     private WebClient webClient;
 
@@ -34,11 +32,18 @@ public class RegisterVehicleActivity extends AppCompatActivity {
 
         btnRegister.setOnClickListener(v -> registerVehicle());
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+        findViewById(R.id.nav_home).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MainMapActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
         });
+
+        findViewById(R.id.nav_calendar).setOnClickListener(v ->
+                Toast.makeText(this, "Calendar coming soon", Toast.LENGTH_SHORT).show()
+        );
+        findViewById(R.id.nav_profile).setOnClickListener(v ->
+                Toast.makeText(this, "Profile coming soon", Toast.LENGTH_SHORT).show()
+        );
     }
 
     private void registerVehicle() {

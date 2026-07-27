@@ -90,13 +90,17 @@ public class WebClient {
     /**
      * Sends a GET request to the specified endpoint.
      */
-    public <T> void get(String endpoint, Class<T> responseDataType, WebCallback<T> callback) {
+    public <T> void get(String endpoint, Type responseType, boolean expectApiResponse, WebCallback<T> callback) {
         Request.Builder builder = new Request.Builder()
                 .url(getFullUrl(endpoint))
                 .get();
 
         addAuthHeader(builder);
-        execute(builder.build(), responseDataType, true, callback);
+        execute(builder.build(), responseType, expectApiResponse, callback);
+    }
+
+    public <T> void get(String endpoint, Class<T> responseDataType, WebCallback<T> callback) {
+        get(endpoint, (Type) responseDataType, true, callback);
     }
 
     private void addAuthHeader(Request.Builder builder) {

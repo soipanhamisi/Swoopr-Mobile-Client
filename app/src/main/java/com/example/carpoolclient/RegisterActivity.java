@@ -84,6 +84,7 @@ public class RegisterActivity extends AppCompatActivity {
                     loadingDialog.dismiss();
 
                     if (success) {
+                        ((GlobalContext) getApplication()).setFullName(fullName);
                         Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
                         
                         // Submit FCM token after acquiring Bearer token

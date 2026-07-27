@@ -9,5 +9,6 @@ import lombok.Setter;
 @Setter
 public class GlobalContext extends Application {
     private boolean isRegistered = false;
+    private String fullName;
 }
 
