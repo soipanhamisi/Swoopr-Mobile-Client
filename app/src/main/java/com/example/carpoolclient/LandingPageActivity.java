@@ -3,15 +3,24 @@ package com.example.carpoolclient;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
+import androidx.activity.SystemBarStyle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.utils.LoadingDialog;
 import com.example.carpoolclient.utils.NetworkUtils;
 import com.example.carpoolclient.utils.SecureTokenStore;
 import com.example.carpoolclient.utils.WebClient;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.Properties;
 
 public class LandingPageActivity extends AppCompatActivity {
     private SecureTokenStore tokenStore;
@@ -20,8 +29,27 @@ public class LandingPageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this, SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT), SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT));
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
         android.util.Log.e("landing_activity", "!!! LANDING ACTIVITY CREATED !!!");
-        
+
+        tokenStore = SecureTokenStore.getInstance(this);
+        webClient = new WebClient(this);
+        GlobalContext globalContext = (GlobalContext) getApplication();
+
+        // DEV: Check for bearer token in dev.env to bypass verification
+        String devToken = checkForDevToken();
+        if (devToken != null && !devToken.isEmpty()) {
+            android.util.Log.i("landing_activity", "DEV: Using bearer token from dev.env");
+            tokenStore.saveJwtToken(devToken);
+            globalContext.setRegistered(true);
+            navigateToMainMap();
+            return;
+        }
+
         // Check for internet connectivity first
         if (!NetworkUtils.isNetworkAvailable(this)) {
             Toast.makeText(this, "No internet connection. Please check your Wi-Fi or Mobile Data.", Toast.LENGTH_LONG).show();
@@ -29,10 +57,6 @@ public class LandingPageActivity extends AppCompatActivity {
             showLandingPage();
             return;
         }
-
-        tokenStore = SecureTokenStore.getInstance(this);
-        webClient = new WebClient(this);
-        GlobalContext globalContext = (GlobalContext) getApplication();
 
         LoadingDialog loadingDialog = new LoadingDialog(this);
         loadingDialog.show();
@@ -76,6 +100,14 @@ public class LandingPageActivity extends AppCompatActivity {
 
     private void showLandingPage() {
         setContentView(R.layout.activity_landing);
+        View root = findViewById(R.id.main_landing_root);
+        if (root != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
         findViewById(R.id.btn_get_started).setOnClickListener(v -> {
             ((GlobalContext) getApplication()).setRegistered(false);
             goToEmailVerification();
@@ -84,6 +116,26 @@ public class LandingPageActivity extends AppCompatActivity {
             ((GlobalContext) getApplication()).setRegistered(true);
             goToEmailVerification();
         });
+    }
+
+    private String checkForDevToken() {
+        try {
+            Properties properties = new Properties();
+            properties.load(getAssets().open("dev.env"));
+            String token = properties.getProperty("BEARER_TOKEN");
+            if (token != null && token.toLowerCase().startsWith("bearer ")) {
+                return token.substring(7).trim();
+            }
+            return token;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void navigateToMainMap() {
+        Intent intent = new Intent(this, MainMapActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     public void goToEmailVerification() {

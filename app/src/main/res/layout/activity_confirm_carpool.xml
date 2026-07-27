@@ -24,11 +24,12 @@
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <View
+            android:id="@+id/drag_handle"
             android:layout_width="60dp"
             android:layout_height="6dp"
             android:layout_gravity="center"
             android:layout_marginBottom="16dp"
-            android:background="@android:color/darker_gray" />
+            android:background="@drawable/drag_handle" />
 
         <!-- Origin -->
         <LinearLayout
@@ -60,7 +61,7 @@
             android:background="@drawable/dashboard_search_background"
             android:padding="12dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="12dp">
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -72,6 +73,52 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Destination: --"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Capacity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dashboard_search_background"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Capacity Icon"/>
+            <TextView
+                android:id="@+id/tv_confirm_capacity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Capacity: 4"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Departure Time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dashboard_search_background"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_time"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Time Icon"/>
+            <TextView
+                android:id="@+id/tv_confirm_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Departure: --"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"/>
         </LinearLayout>
@@ -145,7 +192,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_home"
+                android:src="@drawable/ic_home_vector"
                 android:contentDescription="Home"/>
 
             <ImageView
@@ -153,7 +200,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_calendar"
+                android:src="@drawable/ic_calendar_vector"
                 android:contentDescription="Calendar"/>
 
             <ImageView
@@ -161,7 +208,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_weight="1"
-                android:src="@drawable/ic_profile"
+                android:src="@drawable/ic_profile_vector"
                 android:contentDescription="Profile"/>
 
         </LinearLayout>

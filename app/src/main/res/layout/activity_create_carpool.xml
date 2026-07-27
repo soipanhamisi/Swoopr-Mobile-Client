@@ -31,9 +31,10 @@
                 android:layout_marginEnd="12dp"
                 android:contentDescription="Current Location Icon"/>
             <TextView
+                android:id="@+id/tv_origin_address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Current location:  USIU, Gate B"
+                android:text="Locating..."
                 android:textColor="@android:color/black"
                 android:textSize="18sp"/>
         </LinearLayout>
@@ -45,25 +46,114 @@
             android:background="@drawable/dashboard_search_background"
             android:padding="12dp"
             android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp">
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_search"
                 android:layout_marginEnd="12dp"
                 android:contentDescription="Search Icon"/>
-            <TextView
+            <AutoCompleteTextView
+                android:id="@+id/actv_destination"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Where to..."
+                android:hint="Where to..."
                 android:textColor="@android:color/black"
-                android:textSize="18sp"/>
+                android:textSize="18sp"
+                android:background="@android:color/transparent"
+                android:completionThreshold="1"
+                android:inputType="text"/>
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_mapmode"
                 android:contentDescription="Map Icon"/>
+        </LinearLayout>
+
+        <!-- Capacity Selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dashboard_search_background"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Capacity Icon"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Trip Capacity"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"/>
+
+            <ImageView
+                android:id="@+id/iv_minus"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_minus"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <TextView
+                android:id="@+id/tv_capacity"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="4"
+                android:textColor="@android:color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <ImageView
+                android:id="@+id/iv_plus"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_plus"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+        </LinearLayout>
+
+        <!-- Time Selector -->
+        <LinearLayout
+            android:id="@+id/ll_time_selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dashboard_search_background"
+            android:padding="12dp"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:backgroundTint="@color/dashboard_divider">
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_time"
+                android:layout_marginEnd="12dp"
+                android:contentDescription="Time Icon"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Departure Time"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tv_departure_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Time"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:paddingEnd="8dp"/>
         </LinearLayout>
 
         <!-- Recent Locations List -->
@@ -123,11 +213,14 @@
 
         <!-- Selected Vehicle Card -->
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/card_vehicle_selection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/vehicle_card_background"
             android:padding="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:clickable="true"
+            android:focusable="true">
 
             <ImageView
                 android:id="@+id/iv_car_icon"
@@ -222,7 +315,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_weight="1"
-            android:src="@drawable/ic_home"
+            android:src="@drawable/ic_home_vector"
             android:contentDescription="Home"/>
 
         <ImageView
@@ -230,7 +323,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_weight="1"
-            android:src="@drawable/ic_calendar"
+            android:src="@drawable/ic_calendar_vector"
             android:contentDescription="Calendar"/>
 
         <ImageView
@@ -238,7 +331,7 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_weight="1"
-            android:src="@drawable/ic_profile"
+            android:src="@drawable/ic_profile_vector"
             android:contentDescription="Profile"/>
 
     </LinearLayout>

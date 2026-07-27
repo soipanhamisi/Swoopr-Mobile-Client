@@ -3,14 +3,18 @@ package com.example.carpoolclient;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.SystemBarStyle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.dtos.Coordinates;
@@ -66,6 +71,10 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     private TextView tvTripStart;
     private TextView tvTripDest;
     private TextView tvDashboardTrip;
+    private TextView tvNoActivity;
+    private View llRegisteredCarsSection;
+    private LinearLayout llRegisteredCarsContainer;
+    private View llExpandedContent;
     private Button btnConfirm;
     private FloatingActionButton btnMyLocation;
     
@@ -86,13 +95,82 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        EdgeToEdge.enable(this, SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT), SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT));
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
         setContentView(R.layout.activity_main_map_acitvity);
 
+        tvHint = findViewById(R.id.tv_hint);
+        tvSelectionDetails = findViewById(R.id.tv_selection_details);
+        tvGreeting = findViewById(R.id.tv_greeting);
+        tvTripStart = findViewById(R.id.tv_trip_start);
+        tvTripDest = findViewById(R.id.tv_trip_dest);
+        tvDashboardTrip = findViewById(R.id.tv_dashboard_trip);
+        tvNoActivity = findViewById(R.id.tv_no_activity);
+        llRegisteredCarsSection = findViewById(R.id.ll_registered_cars_section);
+        llRegisteredCarsContainer = findViewById(R.id.ll_registered_cars_container);
+        llExpandedContent = findViewById(R.id.ll_expanded_content);
+        btnConfirm = findViewById(R.id.btn_confirm_selection);
+        btnMyLocation = findViewById(R.id.btn_my_location);
+
+        View stationaryMenu = findViewById(R.id.stationary_bottom_menu);
         View bottomSheet = findViewById(R.id.bottom_sheet);
+        View sheetContent = findViewById(R.id.ll_sheet_content);
+
+        ViewCompat.setOnApplyWindowInsetsListener(stationaryMenu, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            
+            v.post(() -> {
+                if (bottomSheetBehavior != null) {
+                    int menuHeight = v.getHeight();
+                    int basePeekHeight = (int) (90 * getResources().getDisplayMetrics().density);
+                    bottomSheetBehavior.setPeekHeight(basePeekHeight + menuHeight);
+                    
+                    // Add padding to content so it's not covered by menu
+                    sheetContent.setPadding(sheetContent.getPaddingLeft(), sheetContent.getPaddingTop(),
+                                            sheetContent.getPaddingRight(), menuHeight);
+                }
+            });
+            return insets;
+        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(bottomSheet, (v, insets) -> insets);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        btnMyLocation = findViewById(R.id.btn_my_location);
+        
+        // Initial visibility check
+        if (llExpandedContent != null) {
+            llExpandedContent.setVisibility(View.INVISIBLE);
+        }
+        
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    llExpandedContent.setVisibility(View.VISIBLE);
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    llExpandedContent.setVisibility(View.INVISIBLE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Optionally handle cross-fading here
+                llExpandedContent.setAlpha(slideOffset);
+                if (slideOffset > 0) {
+                    llExpandedContent.setVisibility(View.VISIBLE);
+                } else {
+                    llExpandedContent.setVisibility(View.INVISIBLE);
+                }
+
+                // Keep stationaryMenu at the bottom of the screen
+                // In FrameLayout, stationaryMenu moves with the parent. 
+                // We no longer translate it down so it stays visible.
+            }
+        });
 
         btnMyLocation.setOnClickListener(v -> {
             if (googleMap != null) {
@@ -130,14 +208,6 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
 
         webClient = new WebClient(this);
 
-        tvHint = findViewById(R.id.tv_hint);
-        tvSelectionDetails = findViewById(R.id.tv_selection_details);
-        tvGreeting = findViewById(R.id.tv_greeting);
-        tvTripStart = findViewById(R.id.tv_trip_start);
-        tvTripDest = findViewById(R.id.tv_trip_dest);
-        tvDashboardTrip = findViewById(R.id.tv_dashboard_trip);
-        btnConfirm = findViewById(R.id.btn_confirm_selection);
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
@@ -148,14 +218,23 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             handleConfirmation();
         });
 
-        View logo = findViewById(R.id.img_logo_map);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
+            v.setPadding(systemBars.left, 0, systemBars.right, 0);
             
-            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) logo.getLayoutParams();
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) tvHint.getLayoutParams();
             lp.topMargin = systemBars.top + (int)(24 * getResources().getDisplayMetrics().density);
-            logo.setLayoutParams(lp);
+            tvHint.setLayoutParams(lp);
+
+            // Also handle the confirm button padding
+            View btnConfirm = findViewById(R.id.btn_confirm_selection);
+            if (btnConfirm != null) {
+                ViewGroup.MarginLayoutParams btnLp = (ViewGroup.MarginLayoutParams) btnConfirm.getLayoutParams();
+                stationaryMenu.post(() -> {
+                    btnLp.bottomMargin = (int)(32 * getResources().getDisplayMetrics().density) + stationaryMenu.getHeight();
+                    btnConfirm.setLayoutParams(btnLp);
+                });
+            }
             
             return insets;
         });
@@ -203,28 +282,49 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             if (success && data != null) {
                 PendingTripDto trip = (PendingTripDto) data;
                 card.setVisibility(View.VISIBLE);
-                
+                tvNoActivity.setVisibility(View.GONE);
+
                 // Populating with available data
                 tvTripStart.setText("Departure: " + formatDateTime(trip.getTripData().getDepartureTime()));
                 tvTripDest.setText("Capacity: " + trip.getTripData().getCapacity());
-                
+
                 if (trip.getCarpoolMemberNames() != null && !trip.getCarpoolMemberNames().isEmpty()) {
                     tvDashboardTrip.setText(String.join("\n", trip.getCarpoolMemberNames()));
                 } else {
                     tvDashboardTrip.setText("No other members");
                 }
             } else {
-                // If no pending trip, we could either hide the card or show a "No trips" state
-                // Based on the overhaul, let's keep it visible but show empty state or hide it.
-                // For now, let's hide it if no data.
                 card.setVisibility(View.GONE);
+                tvNoActivity.setVisibility(View.VISIBLE);
+                tvNoActivity.setText("No activity");
             }
         });
 
         // 2. Registered Vehicles
         Type listType = new TypeToken<List<VehicleDto>>(){}.getType();
         webClient.get("/trips/queryRegisteredVehicle", listType, true, (success, message, data) -> {
-            // Data fetched, can be used for other UI elements if needed
+            if (success && data != null) {
+                List<VehicleDto> vehicles = (List<VehicleDto>) data;
+                llRegisteredCarsContainer.removeAllViews();
+                if (!vehicles.isEmpty()) {
+                    llRegisteredCarsSection.setVisibility(View.VISIBLE);
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    for (VehicleDto vehicle : vehicles) {
+                        View carView = inflater.inflate(R.layout.item_registered_car, llRegisteredCarsContainer, false);
+                        TextView nameTv = carView.findViewById(R.id.tv_vehicle_name);
+                        TextView plateTv = carView.findViewById(R.id.tv_vehicle_plate);
+                        
+                        nameTv.setText(vehicle.getDesc());
+                        plateTv.setText(vehicle.getRegNo());
+                        
+                        llRegisteredCarsContainer.addView(carView);
+                    }
+                } else {
+                    llRegisteredCarsSection.setVisibility(View.GONE);
+                }
+            } else {
+                llRegisteredCarsSection.setVisibility(View.GONE);
+            }
         });
     }
 
