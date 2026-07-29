@@ -8,6 +8,7 @@ import lombok.Setter;
 public class TripData {
     private int capacity;
     private String departureTime;
+    private VehicleDto vehicle;
     private OriginDestinationCoordinates originDestinationCoordinates;
 
     @Getter

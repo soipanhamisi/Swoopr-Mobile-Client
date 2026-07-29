@@ -15,6 +15,8 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.dtos.TripData;
+import com.example.carpoolclient.dtos.VehicleDto;
+import com.example.carpoolclient.utils.PolylineDecoder;
 import com.example.carpoolclient.utils.WebClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,9 +27,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class ConfirmCarpoolActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -39,6 +45,7 @@ public class ConfirmCarpoolActivity extends AppCompatActivity implements OnMapRe
     private String originName, destName;
     private int capacity;
     private int selectedHour, selectedMinute;
+    private BottomSheetBehavior<View> bottomSheetBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +57,25 @@ public class ConfirmCarpoolActivity extends AppCompatActivity implements OnMapRe
         }
         setContentView(R.layout.activity_confirm_carpool);
 
+        View stationaryMenu = findViewById(R.id.stationary_bottom_nav);
         View bottomSheet = findViewById(R.id.confirm_bottom_sheet);
-        ViewCompat.setOnApplyWindowInsetsListener(bottomSheet, (v, insets) -> {
+        View sheetContent = findViewById(R.id.ll_confirm_sheet_content);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        ViewCompat.setOnApplyWindowInsetsListener(stationaryMenu, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            android.view.ViewGroup.MarginLayoutParams mlp = (android.view.ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.bottomMargin = systemBars.bottom;
-            v.setLayoutParams(mlp);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
+            
+            v.post(() -> {
+                int menuHeight = v.getHeight();
+                // peekHeight = menu height + drag handle area (approx 40dp)
+                int basePeekHeight = (int) (40 * getResources().getDisplayMetrics().density);
+                bottomSheetBehavior.setPeekHeight(basePeekHeight + menuHeight);
+                
+                // Add padding to content so bottom items aren't covered by menu when expanded
+                sheetContent.setPadding(sheetContent.getPaddingLeft(), sheetContent.getPaddingTop(),
+                                        sheetContent.getPaddingRight(), menuHeight);
+            });
             return insets;
         });
 
@@ -106,26 +126,79 @@ public class ConfirmCarpoolActivity extends AppCompatActivity implements OnMapRe
                 .snippet(destName)
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
-        // Draw polyline
+        // Fetch and draw actual road route
+        fetchRoute();
+    }
+
+    private void fetchRoute() {
+        String url = String.format(Locale.US,
+                "https://maps.googleapis.com/maps/api/directions/json?origin=%f,%f&destination=%f,%f&key=%s",
+                originLatLng.latitude, originLatLng.longitude,
+                destLatLng.latitude, destLatLng.longitude,
+                getString(R.string.google_maps_key));
+
+        webClient.get(url, JsonObject.class, false, (success, message, data) -> {
+            if (success && data instanceof JsonObject) {
+                try {
+                    JsonObject jsonResponse = (JsonObject) data;
+                    JsonArray routes = jsonResponse.getAsJsonArray("routes");
+                    if (routes != null && routes.size() > 0) {
+                        JsonObject route = routes.get(0).getAsJsonObject();
+                        String encodedPolyline = route.getAsJsonObject("overview_polyline").get("points").getAsString();
+                        List<LatLng> path = PolylineDecoder.decode(encodedPolyline);
+
+                        if (!path.isEmpty()) {
+                            PolylineOptions options = new PolylineOptions()
+                                    .addAll(path)
+                                    .width(12)
+                                    .color(Color.BLUE)
+                                    .geodesic(true);
+                            googleMap.addPolyline(options);
+
+                            // Fit camera to the actual route
+                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                            for (LatLng point : path) {
+                                builder.include(point);
+                            }
+                            LatLngBounds bounds = builder.build();
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
+                        }
+                    } else {
+                        drawFallbackLine();
+                    }
+                } catch (Exception e) {
+                    android.util.Log.e("ConfirmCarpool", "Error parsing directions", e);
+                    drawFallbackLine();
+                }
+            } else {
+                drawFallbackLine();
+            }
+        });
+    }
+
+    private void drawFallbackLine() {
+        // Fallback to straight line if API fails
         googleMap.addPolyline(new PolylineOptions()
                 .add(originLatLng, destLatLng)
                 .width(10)
-                .color(Color.BLUE)
+                .color(Color.GRAY)
                 .geodesic(true));
 
-        // Move camera to fit both points
         LatLngBounds bounds = new LatLngBounds.Builder()
                 .include(originLatLng)
                 .include(destLatLng)
                 .build();
-        googleMap.setOnMapLoadedCallback(() -> 
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
-        );
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
     }
 
     private void submitCreateRequest() {
         TripData request = new TripData();
         request.setCapacity(capacity);
+
+        VehicleDto vehicle = new VehicleDto();
+        vehicle.setRegNo(vehiclePlate);
+        vehicle.setDesc(vehicleName);
+        request.setVehicle(vehicle);
         
         // Format the selected time for today in ISO-8601
         Calendar cal = Calendar.getInstance();

@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carpoolclient.dtos.VehicleDto;
 import com.example.carpoolclient.utils.WebClient;
@@ -26,7 +27,9 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
@@ -42,11 +45,13 @@ import java.util.Locale;
 
 public class CreateCarpoolActivity extends AppCompatActivity {
 
-    private TextView tvVehicleName, tvVehiclePlate, tvOriginAddress, tvCapacity, tvDepartureTime;
+    private TextView tvOriginAddress, tvCapacity, tvDepartureTime;
     private AutoCompleteTextView actvDestination;
     private WebClient webClient;
     private List<VehicleDto> registeredVehicles;
     private VehicleDto selectedVehicle;
+    private RecyclerView rvVehicles;
+    private VehicleAdapter vehicleAdapter;
     
     private FusedLocationProviderClient fusedLocationClient;
     private PlacesClient placesClient;
@@ -55,6 +60,7 @@ public class CreateCarpoolActivity extends AppCompatActivity {
     private int capacity = 4;
     private int selectedHour = -1, selectedMinute = -1;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private static final int MAP_SELECTION_REQUEST_CODE = 2;
 
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -80,20 +86,17 @@ public class CreateCarpoolActivity extends AppCompatActivity {
 
         webClient = new WebClient(this);
 
-        tvVehicleName = findViewById(R.id.tv_vehicle_name);
-        tvVehiclePlate = findViewById(R.id.tv_vehicle_plate);
         tvOriginAddress = findViewById(R.id.tv_origin_address);
         tvCapacity = findViewById(R.id.tv_capacity);
         tvDepartureTime = findViewById(R.id.tv_departure_time);
         actvDestination = findViewById(R.id.actv_destination);
+        rvVehicles = findViewById(R.id.rv_vehicles);
 
         setupLocation();
         setupDestinationAutocomplete();
         setupCapacityControls();
         setupTimePicker();
 
-        findViewById(R.id.card_vehicle_selection).setOnClickListener(v -> showVehicleSelectionDialog());
-        findViewById(R.id.tv_select_vehicle).setOnClickListener(v -> showVehicleSelectionDialog());
         findViewById(R.id.btn_register_new).setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterVehicleActivity.class));
         });
@@ -123,6 +126,11 @@ public class CreateCarpoolActivity extends AppCompatActivity {
                 intent.putExtra("SELECTED_MINUTE", selectedMinute);
                 startActivity(intent);
             }
+        });
+
+        findViewById(R.id.iv_map_mode).setOnClickListener(v -> {
+            Intent intent = new Intent(this, MapPickerActivity.class);
+            startActivityForResult(intent, MAP_SELECTION_REQUEST_CODE);
         });
 
         findViewById(R.id.nav_home).setOnClickListener(v -> finish());
@@ -176,13 +184,28 @@ public class CreateCarpoolActivity extends AppCompatActivity {
     }
 
     private void setupDestinationAutocomplete() {
-        actvDestination.setFocusable(false);
-        actvDestination.setOnClickListener(v -> {
-            List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.DISPLAY_NAME, Place.Field.LOCATION, Place.Field.FORMATTED_ADDRESS);
-            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                    .setCountries(Collections.singletonList("KE"))
-                    .build(this);
-            startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), getString(R.string.google_maps_key));
+            placesClient = Places.createClient(this);
+        }
+
+        AutocompleteAdapter adapter = new AutocompleteAdapter(this, placesClient);
+        actvDestination.setThreshold(1);
+        actvDestination.setAdapter(adapter);
+        actvDestination.setOnItemClickListener((parent, view, position, id) -> {
+            AutocompletePrediction item = adapter.getItem(position);
+            if (item != null) {
+                String placeId = item.getPlaceId();
+                List<Place.Field> placeFields = Arrays.asList(Place.Field.LOCATION, Place.Field.DISPLAY_NAME);
+                FetchPlaceRequest request = FetchPlaceRequest.builder(placeId, placeFields).build();
+                placesClient.fetchPlace(request).addOnSuccessListener(response -> {
+                    Place place = response.getPlace();
+                    destLatLng = place.getLocation();
+                    destName = place.getDisplayName();
+                    actvDestination.setText(destName);
+                    actvDestination.setSelection(destName.length());
+                });
+            }
         });
     }
 
@@ -198,8 +221,17 @@ public class CreateCarpoolActivity extends AppCompatActivity {
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Toast.makeText(this, "Search failed", Toast.LENGTH_SHORT).show();
             }
+        } else if (requestCode == MAP_SELECTION_REQUEST_CODE) {
+            if (resultCode == RESULT_OK && data != null) {
+                double lat = data.getDoubleExtra("DEST_LAT", 0);
+                double lng = data.getDoubleExtra("DEST_LNG", 0);
+                destName = data.getStringExtra("DEST_NAME");
+                destLatLng = new LatLng(lat, lng);
+                actvDestination.setText(destName);
+            }
         }
     }
+
 
     private void setupCapacityControls() {
         findViewById(R.id.iv_minus).setOnClickListener(v -> {
@@ -242,40 +274,13 @@ public class CreateCarpoolActivity extends AppCompatActivity {
             if (success && data != null) {
                 registeredVehicles = (List<VehicleDto>) data;
                 if (!registeredVehicles.isEmpty()) {
-                    selectedVehicle = registeredVehicles.get(0);
-                    updateVehicleUI();
-                } else {
-                    tvVehicleName.setText("No vehicle registered");
-                    tvVehiclePlate.setText("--");
+                    selectedVehicle = null; // Ensure initially dark
+                    vehicleAdapter = new VehicleAdapter(registeredVehicles, vehicle -> {
+                        selectedVehicle = vehicle;
+                    });
+                    rvVehicles.setAdapter(vehicleAdapter);
                 }
             }
         });
-    }
-
-    private void updateVehicleUI() {
-        if (selectedVehicle != null) {
-            tvVehicleName.setText(selectedVehicle.getDesc());
-            tvVehiclePlate.setText(selectedVehicle.getRegNo());
-        }
-    }
-
-    private void showVehicleSelectionDialog() {
-        if (registeredVehicles == null || registeredVehicles.isEmpty()) {
-            Toast.makeText(this, "No vehicles registered", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String[] vehicleNames = new String[registeredVehicles.size()];
-        for (int i = 0; i < registeredVehicles.size(); i++) {
-            vehicleNames[i] = registeredVehicles.get(i).getRegNo() + " (" + registeredVehicles.get(i).getDesc() + ")";
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Select Vehicle")
-                .setItems(vehicleNames, (dialog, which) -> {
-                    selectedVehicle = registeredVehicles.get(which);
-                    updateVehicleUI();
-                })
-                .show();
     }
 }

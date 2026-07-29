@@ -56,7 +56,7 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     private static final float DEFAULT_ZOOM = 14f;
 
     private enum SelectionState { NONE, SELECTING_ORIGIN, SELECTING_DESTINATION }
-    private enum ActionType { NONE, JOIN, CREATE }
+    private enum ActionType { NONE, JOIN, CREATE, SELECT_DESTINATION }
 
     private GoogleMap googleMap;
     private Marker originMarker;
@@ -207,6 +207,12 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
         webClient = new WebClient(this);
+
+        if (getIntent().getBooleanExtra("SELECT_MODE", false)) {
+            startSelectionProcess(ActionType.SELECT_DESTINATION);
+            selectionState = SelectionState.SELECTING_DESTINATION;
+            tvHint.setText("Tap map to select destination");
+        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         if (mapFragment != null) {
@@ -424,6 +430,20 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void handleConfirmation() {
         android.util.Log.d("MainMapActivity", "handleConfirmation called. Action: " + currentAction + ", Origin: " + selectedOrigin + ", Dest: " + selectedDestination);
+        
+        if (currentAction == ActionType.SELECT_DESTINATION) {
+            if (selectedDestination == null) {
+                Toast.makeText(this, "Please select a destination on the map", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("DEST_LAT", selectedDestination.getLatitude());
+            resultIntent.putExtra("DEST_LNG", selectedDestination.getLongitude());
+            setResult(RESULT_OK, resultIntent);
+            finish();
+            return;
+        }
+
         if (selectedOrigin == null || selectedDestination == null) {
             Toast.makeText(this, "Please select both origin and destination", Toast.LENGTH_SHORT).show();
             return;
