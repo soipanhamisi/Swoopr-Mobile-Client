@@ -108,14 +108,45 @@ public class LandingPageActivity extends AppCompatActivity {
                 return insets;
             });
         }
-        findViewById(R.id.btn_get_started).setOnClickListener(v -> {
+
+        findViewById(R.id.btn_landing_sign_up).setOnClickListener(v -> {
             ((GlobalContext) getApplication()).setRegistered(false);
             goToEmailVerification();
         });
-        findViewById(R.id.btn_verifyEmail).setOnClickListener(v -> {
-            ((GlobalContext) getApplication()).setRegistered(true);
-            goToEmailVerification();
-        });
+
+        setupFooterLink();
+    }
+
+    private void setupFooterLink() {
+        android.widget.TextView tvFooter = findViewById(R.id.tv_landing_footer);
+        String text = getString(R.string.landing_already_have_account);
+        android.text.SpannableString spannableString = new android.text.SpannableString(text);
+
+        String linkText = "verify email";
+        int start = text.indexOf(linkText);
+        int end = start + linkText.length();
+
+        if (start != -1) {
+            android.text.style.ClickableSpan clickableSpan = new android.text.style.ClickableSpan() {
+                @Override
+                public void onClick(android.view.View widget) {
+                    ((GlobalContext) getApplication()).setRegistered(true);
+                    goToEmailVerification();
+                }
+
+                @Override
+                public void updateDrawState(android.text.TextPaint ds) {
+                    super.updateDrawState(ds);
+                    ds.setColor(getColor(R.color.landing_link_blue));
+                    ds.setUnderlineText(false);
+                    ds.setFakeBoldText(true);
+                }
+            };
+            spannableString.setSpan(clickableSpan, start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        tvFooter.setText(spannableString);
+        tvFooter.setMovementMethod(android.text.method.LinkMovementMethod.getInstance());
     }
 
     private String checkForDevToken() {

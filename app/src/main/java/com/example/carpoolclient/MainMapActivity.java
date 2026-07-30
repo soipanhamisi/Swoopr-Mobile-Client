@@ -27,6 +27,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.carpoolclient.dtos.CarpoolRequestDto;
 import com.example.carpoolclient.dtos.Coordinates;
 import com.example.carpoolclient.dtos.JoinCarpoolDto;
 import com.example.carpoolclient.dtos.PendingTripDto;
@@ -68,10 +69,8 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     private TextView tvHint;
     private TextView tvSelectionDetails;
     private TextView tvGreeting;
-    private TextView tvTripStart;
-    private TextView tvTripDest;
-    private TextView tvDashboardTrip;
-    private TextView tvNoActivity;
+    private TextView tvTripStart, tvTripDest, tvDashboardTrip, tvNoActivity;
+    private TextView tvRequestStart, tvRequestDest;
     private View llRegisteredCarsSection;
     private LinearLayout llRegisteredCarsContainer;
     private View llExpandedContent;
@@ -109,6 +108,8 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         tvTripDest = findViewById(R.id.tv_trip_dest);
         tvDashboardTrip = findViewById(R.id.tv_dashboard_trip);
         tvNoActivity = findViewById(R.id.tv_no_activity);
+        tvRequestStart = findViewById(R.id.tv_request_start);
+        tvRequestDest = findViewById(R.id.tv_request_dest);
         llRegisteredCarsSection = findViewById(R.id.ll_registered_cars_section);
         llRegisteredCarsContainer = findViewById(R.id.ll_registered_cars_container);
         llExpandedContent = findViewById(R.id.ll_expanded_content);
@@ -190,7 +191,7 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
         findViewById(R.id.btn_nav_join).setOnClickListener(v -> {
-            startSelectionProcess(ActionType.JOIN);
+            startActivity(new Intent(this, JoinCarpoolActivity.class));
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
         findViewById(R.id.btn_nav_create).setOnClickListener(v -> {
@@ -203,6 +204,10 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         });
         findViewById(R.id.btn_nav_cancel).setOnClickListener(v -> {
             cancelCurrentTrip();
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+        findViewById(R.id.btn_cancel_request).setOnClickListener(v -> {
+            cancelRideRequest();
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
 
@@ -282,15 +287,14 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
             tvGreeting.setText("Hello User...");
         }
 
-        // 1. Scheduled Trips
+        // 1. Scheduled Trips (Host View)
         webClient.get("/trips/queryPendingTrips", PendingTripDto.class, (success, message, data) -> {
-            View card = findViewById(R.id.card_pending_trip);
+            View pendingCard = findViewById(R.id.card_pending_trip);
             if (success && data != null) {
                 PendingTripDto trip = (PendingTripDto) data;
-                card.setVisibility(View.VISIBLE);
                 tvNoActivity.setVisibility(View.GONE);
+                pendingCard.setVisibility(View.VISIBLE);
 
-                // Populating with available data
                 tvTripStart.setText("Departure: " + formatDateTime(trip.getTripData().getDepartureTime()));
                 tvTripDest.setText("Capacity: " + trip.getTripData().getCapacity());
 
@@ -300,9 +304,24 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
                     tvDashboardTrip.setText("No other members");
                 }
             } else {
-                card.setVisibility(View.GONE);
-                tvNoActivity.setVisibility(View.VISIBLE);
-                tvNoActivity.setText("No activity");
+                pendingCard.setVisibility(View.GONE);
+                checkEmptyActivity();
+            }
+        });
+
+        // 2. Carpool Requests (Passenger View)
+        webClient.get("/trips/queryCarpoolRequests", CarpoolRequestDto.class, (success, message, data) -> {
+            View requestCard = findViewById(R.id.card_carpool_request);
+            if (success && data != null) {
+                CarpoolRequestDto request = (CarpoolRequestDto) data;
+                tvNoActivity.setVisibility(View.GONE);
+                requestCard.setVisibility(View.VISIBLE);
+
+                tvRequestStart.setText("Requested at: " + formatDateTime(request.getRequestMadeAt()));
+                tvRequestDest.setText("Destination Zone: " + request.getDestinationZone());
+            } else {
+                requestCard.setVisibility(View.GONE);
+                checkEmptyActivity();
             }
         });
 
@@ -332,6 +351,15 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
                 llRegisteredCarsSection.setVisibility(View.GONE);
             }
         });
+    }
+
+    private void checkEmptyActivity() {
+        View pendingCard = findViewById(R.id.card_pending_trip);
+        View requestCard = findViewById(R.id.card_carpool_request);
+        if (pendingCard.getVisibility() == View.GONE && requestCard.getVisibility() == View.GONE) {
+            tvNoActivity.setVisibility(View.VISIBLE);
+            tvNoActivity.setText("No activity");
+        }
     }
 
     private String formatDateTime(String isoString) {
@@ -460,6 +488,15 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
 
     private void cancelCurrentTrip() {
         webClient.post("/trips/cancelTrip", Void.class, (success, message, data) -> {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            if (success) {
+                resetToInitialState();
+            }
+        });
+    }
+
+    private void cancelRideRequest() {
+        webClient.post("/trips/cancelRideRequest", Void.class, (success, message, data) -> {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             if (success) {
                 resetToInitialState();

@@ -61,11 +61,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name=".JoinCarpoolActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".MapPickerActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ConfirmCarpoolActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ConfirmJoinActivity"
             android:exported="false" />
     </application>
 

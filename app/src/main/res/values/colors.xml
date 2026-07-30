@@ -32,4 +32,10 @@
     <!-- Glass Effects (Semi-transparent) -->
     <color name="glass_white">#B3FFFFFF</color>
     <color name="glass_dark">#80202020</color>
+
+    <!-- Landing Page Specific Colors -->
+    <color name="landing_orange">#E67E65</color>
+    <color name="landing_green">#2D7D5F</color>
+    <color name="landing_link_blue">#3498DB</color>
+    <color name="landing_text_black">#000000</color>
 </resources>

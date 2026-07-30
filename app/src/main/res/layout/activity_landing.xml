@@ -1,61 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_landing_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/earthy_dark_background">
+    android:background="@color/white"
+    android:padding="24dp">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_verifyEmail"
-        android:layout_width="212dp"
-        android:layout_height="48dp"
-        android:layout_margin="32dp"
-        android:background="@drawable/rounded_button"
-        android:backgroundTint="@color/earthy_dark_on_secondary"
+    <TextView
+        android:id="@+id/tv_landing_top"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
         android:fontFamily="@font/inter"
-        android:text="@string/verifyEmailOption"
-        android:textAllCaps="false"
-        android:textColor="@color/earthy_dark_primary"
-        android:textSize="15sp"
+        android:text="@string/landing_top_text"
+        android:textColor="@color/landing_orange"
+        android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.927" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_landing_headline"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/landing_headline"
+        android:textColor="@color/landing_green"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_landing_top" />
 
     <ImageView
-        android:id="@+id/img_logo"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:contentDescription="@string/logo_description"
-        android:src="@drawable/swoopr_logo"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/img_landing_illustration"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/walking_man"
+        app:layout_constraintBottom_toTopOf="@+id/tv_landing_description"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.427"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.388"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintTop_toBottomOf="@id/tv_landing_headline"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <TextView
+        android:id="@+id/tv_landing_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="@font/inter"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:text="@string/landing_description"
+        android:textColor="@color/landing_text_black"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_landing_sign_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btn_get_started"
-        android:layout_width="261dp"
-        android:layout_height="67dp"
-        android:layout_margin="32dp"
+        android:id="@+id/btn_landing_sign_up"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/rounded_button"
-        android:backgroundTint="@color/earthy_dark_primary"
-        android:fontFamily="@font/workforce_sans"
-        android:text="@string/get_started"
+        android:backgroundTint="@color/landing_green"
+        android:fontFamily="@font/inter"
+        android:text="@string/landing_sign_up"
         android:textAllCaps="false"
-        android:textColor="@color/earthy_dark_on_primary"
-        android:textSize="25sp"
+        android:textColor="@color/white"
+        android:textSize="16sp"
         android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/tv_landing_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_landing_footer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:fontFamily="@font/inter"
+        android:text="@string/landing_already_have_account"
+        android:textColor="@color/landing_text_black"
+        android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.771" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
