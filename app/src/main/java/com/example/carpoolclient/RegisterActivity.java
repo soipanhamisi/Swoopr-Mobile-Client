@@ -15,12 +15,14 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.dtos.UserDto;
 import com.example.carpoolclient.utils.LoadingDialog;
+import com.example.carpoolclient.utils.SecureTokenStore;
 import com.example.carpoolclient.utils.WebClient;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 public class RegisterActivity extends AppCompatActivity {
     private LoadingDialog loadingDialog;
     private WebClient webClient;
+    private SecureTokenStore tokenStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         webClient = new WebClient(this);
         loadingDialog = new LoadingDialog(this);
+        tokenStore = SecureTokenStore.getInstance(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -38,10 +41,7 @@ public class RegisterActivity extends AppCompatActivity {
             return insets;
         });
 
-        EditText etFirstName = findViewById(R.id.et_first_name);
-        EditText etLastName = findViewById(R.id.et_last_name);
-        EditText etPhoneNumber = findViewById(R.id.et_phone_number);
-        EditText etStudentId = findViewById(R.id.et_student_id);
+        EditText etFullName = findViewById(R.id.et_full_name);
         Button btnFinish = findViewById(R.id.btn_complete_registration);
         ScrollView scrollView = findViewById(R.id.scroll_view);
 
@@ -50,70 +50,88 @@ public class RegisterActivity extends AppCompatActivity {
             email = "";
         }
 
-        EditText[] editTexts = new EditText[]{etFirstName, etLastName, etPhoneNumber, etStudentId};
-        for (EditText et : editTexts) {
-            et.setOnFocusChangeListener((v, hasFocus) -> {
-                if (hasFocus) {
-                    scrollView.postDelayed(() -> scrollView.smoothScrollTo(0, et.getBottom() + 100), 100);
-                }
-            });
-        }
+        etFullName.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                scrollView.postDelayed(() -> scrollView.smoothScrollTo(0, etFullName.getBottom() + 100), 100);
+            }
+        });
 
         final String finalEmail = email;
         btnFinish.setOnClickListener(v -> {
-            String firstName = etFirstName.getText().toString().trim();
-            String lastName = etLastName.getText().toString().trim();
-            String phoneNumber = etPhoneNumber.getText().toString().trim();
-            String studentId = etStudentId.getText().toString().trim();
+            String fullName = etFullName.getText().toString().trim();
 
-            if (firstName.isEmpty() || lastName.isEmpty() || phoneNumber.isEmpty() || studentId.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            if (fullName.isEmpty()) {
+                Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             btnFinish.setEnabled(false);
             loadingDialog.show();
 
+            boolean isRegistered = ((GlobalContext) getApplication()).isRegistered();
+
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
                 String fcmToken = task.isSuccessful() ? task.getResult() : null;
-                String fullName = firstName + " " + lastName;
-                UserDto userDto = new UserDto(fullName, finalEmail, "NORMAL_USER", fcmToken);
 
-                webClient.post("/auth/saveUser", userDto, Void.class, (success, message, data) -> {
-                    btnFinish.setEnabled(true);
-                    loadingDialog.dismiss();
-
-                    if (success) {
-                        ((GlobalContext) getApplication()).setFullName(fullName);
-                        Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                        
-                        // Submit FCM token after acquiring Bearer token
-                        if (fcmToken != null) {
-                            webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
-                                if (s) android.util.Log.i("register_activity", "FCM token submitted successfully");
-                            });
-                        }
-                        
-                        navigateToMainMap();
+                if (isRegistered) {
+                    // Existing user flow: just save name locally and submit FCM token
+                    saveUserDataLocally(fullName);
+                    
+                    if (fcmToken != null) {
+                        webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                            if (s) android.util.Log.i("register_activity", "FCM token submitted successfully");
+                            loadingDialog.dismiss();
+                            navigateToMainMap();
+                        });
                     } else {
-                        boolean userExists = message != null && (message.toLowerCase().contains("user exists") || message.toLowerCase().contains("already registered"));
-                        if (userExists) {
-                            // Submit FCM token after acquiring Bearer token (via successful auth fallback)
+                        loadingDialog.dismiss();
+                        navigateToMainMap();
+                    }
+                } else {
+                    // New user flow: call /auth/saveUser
+                    UserDto userDto = new UserDto(fullName, finalEmail, "NORMAL_USER", fcmToken);
+
+                    webClient.post("/auth/saveUser", userDto, Void.class, (success, message, data) -> {
+                        btnFinish.setEnabled(true);
+                        loadingDialog.dismiss();
+
+                        if (success) {
+                            saveUserDataLocally(fullName);
+                            Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                            
                             if (fcmToken != null) {
                                 webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
-                                    if (s) android.util.Log.i("register_activity", "FCM token submitted successfully (fallback)");
+                                    if (s) android.util.Log.i("register_activity", "FCM token submitted successfully");
                                 });
                             }
                             
-                            Toast.makeText(this, "Account already registered. Logging you in...", Toast.LENGTH_SHORT).show();
                             navigateToMainMap();
                         } else {
-                            Toast.makeText(this, "Registration failed: " + message, Toast.LENGTH_LONG).show();
+                            boolean userExists = message != null && (message.toLowerCase().contains("user exists") || message.toLowerCase().contains("already registered"));
+                            if (userExists) {
+                                saveUserDataLocally(fullName);
+                                if (fcmToken != null) {
+                                    webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
+                                        if (s) android.util.Log.i("register_activity", "FCM token submitted successfully (fallback)");
+                                    });
+                                }
+                                
+                                Toast.makeText(this, "Account already registered. Logging you in...", Toast.LENGTH_SHORT).show();
+                                navigateToMainMap();
+                            } else {
+                                Toast.makeText(this, "Registration failed: " + message, Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
         });
+    }
+
+    private void saveUserDataLocally(String fullName) {
+        tokenStore.saveFullName(fullName);
+        ((GlobalContext) getApplication()).setFullName(fullName);
+        ((GlobalContext) getApplication()).setRegistered(true);
     }
 
     private void navigateToMainMap() {

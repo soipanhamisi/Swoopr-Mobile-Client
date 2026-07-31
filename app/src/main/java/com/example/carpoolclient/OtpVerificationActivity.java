@@ -2,6 +2,8 @@ package com.example.carpoolclient;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -16,9 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.carpoolclient.dtos.AuthenticateRequest;
 import com.example.carpoolclient.dtos.EmailDto;
-import com.example.carpoolclient.dtos.TokenResponse;
 import com.example.carpoolclient.utils.LoadingDialog;
-import com.example.carpoolclient.utils.SecureTokenStore;
 import com.example.carpoolclient.utils.WebClient;
 
 public class OtpVerificationActivity extends AppCompatActivity {
@@ -43,11 +43,16 @@ public class OtpVerificationActivity extends AppCompatActivity {
             return insets;
         });
 
-        EditText etOtp = findViewById(R.id.et_otp);
+        EditText etOtp1 = findViewById(R.id.et_otp_1);
+        EditText etOtp2 = findViewById(R.id.et_otp_2);
+        EditText etOtp3 = findViewById(R.id.et_otp_3);
         Button btnVerifyOtp = findViewById(R.id.btn_verify_otp);
         TextView tvMessage = findViewById(R.id.tv_otp_message);
         TextView tvResendOtp = findViewById(R.id.tv_resend_otp);
         ScrollView scrollView = findViewById(R.id.scroll_view);
+
+        setupOtpAutoJump(etOtp1, etOtp2, etOtp3);
+
         String email = getIntent().getStringExtra("EMAIL");
         if (email == null) {
             email = "";
@@ -66,9 +71,11 @@ public class OtpVerificationActivity extends AppCompatActivity {
         });
 
         btnVerifyOtp.setOnClickListener(v -> {
-            String otpStr = etOtp.getText().toString().trim();
-            if (otpStr.isEmpty()) {
-                Toast.makeText(this, "Please enter OTP", Toast.LENGTH_SHORT).show();
+            String otpStr = etOtp1.getText().toString().trim() +
+                           etOtp2.getText().toString().trim() +
+                           etOtp3.getText().toString().trim();
+            if (otpStr.length() < OTP_LENGTH) {
+                Toast.makeText(this, "Please enter all " + OTP_LENGTH + " digits", Toast.LENGTH_SHORT).show();
                 return;
             }
             try {
@@ -79,43 +86,54 @@ public class OtpVerificationActivity extends AppCompatActivity {
             }
         });
 
-        etOtp.setOnFocusChangeListener((v, hasFocus) -> {
+        etOtp1.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 scrollView.postDelayed(() -> scrollView.smoothScrollTo(0, btnVerifyOtp.getBottom() + 100), 100);
             }
         });
+    }
 
+    private void setupOtpAutoJump(EditText et1, EditText et2, EditText et3) {
+        et1.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                if (s.length() == 1) et2.requestFocus();
+            }
+        });
+        et2.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                if (s.length() == 1) et3.requestFocus();
+                else if (s.length() == 0) et1.requestFocus();
+            }
+        });
+        et3.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                if (s.length() == 0) et2.requestFocus();
+            }
+        });
     }
 
     private void verifyOtp(String email, int otp) {
         loadingDialog.show();
+        boolean isRegistered = ((GlobalContext) getApplication()).isRegistered();
+        String endpoint = isRegistered ? "/auth/getNewToken" : "/auth/authenticateUser";
+
         AuthenticateRequest request = new AuthenticateRequest(otp, email);
-        webClient.post("/auth/getNewToken",
+        webClient.post(endpoint,
                 request,
-                TokenResponse.class,
+                Void.class,
                 (success, message, data) -> {
                     loadingDialog.dismiss();
                     if (success) {
-                        // Submit FCM token after acquiring Bearer token
-                        String fcmToken = SecureTokenStore.getInstance(this).getFcmToken();
-                        if (fcmToken != null) {
-                            webClient.post("/auth/submitMessagingToken", fcmToken, Void.class, (s, m, d) -> {
-                                if (s) android.util.Log.i("otp_verification", "FCM token submitted successfully");
-                            });
-                        }
-
-                        GlobalContext globalContext = (GlobalContext) getApplication();
-                        if (globalContext.isRegistered()) {
-                            // Proceed to Main Map if user was already registered (clicked verifyEmail)
-                            Intent intent = new Intent(this, MainMapActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                        } else {
-                            // Proceed to Registration if new user (clicked get started)
-                            Intent intent = new Intent(this, RegisterActivity.class);
-                            intent.putExtra("EMAIL", email);
-                            startActivity(intent);
-                        }
+                        // Proceed to Registration/Profile screen
+                        Intent intent = new Intent(this, RegisterActivity.class);
+                        intent.putExtra("EMAIL", email);
+                        startActivity(intent);
                         finish();
                     } else {
                         Toast.makeText(this, message != null ? message : "Verification failed", Toast.LENGTH_SHORT).show();

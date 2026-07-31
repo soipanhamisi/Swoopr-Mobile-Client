@@ -1,37 +1,11 @@
 <resources>
     <string name="app_name">Swoopr</string>
-    <string name="tagLine">Tap. Match. Ride together</string>
-    <string name="get_started">Get Started</string>
     <string name="logo_description">Swoopr Logo</string>
     <string name="email_verification_title">Email Verification</string>
-    <string name="usiu_email_hint">Please use your USIU email address</string>
-    <string name="email_example">example@usiu.ac.ke</string>
-    <string name="verify_email">Verify Email</string>
-    <string name="otp_verification_title">Enter OTP</string>
     <string name="otp_sent_message">Please check your inbox. We\'ve sent a 3-digit code to %1$s</string>
-    <string name="verify_otp">Verify &amp; Proceed</string>
-    <string name="resend_otp">Didn\'t receive code? Resend</string>
-    <string name="otp_hint">000</string>
-    <string name="create_account_title">Create Account</string>
-    <string name="complete_profile_subtitle">Complete your profile</string>
-    <string name="first_name_hint">First Name</string>
-    <string name="last_name_hint">Last Name</string>
-    <string name="phone_number_hint">Phone Number</string>
-    <string name="student_id_hint">Student ID</string>
-    <string name="password_hint">Password</string>
-    <string name="confirm_password_hint">Confirm Password</string>
-    <string name="finish_button">Finish</string>
-    <string name="loading">Loading...</string>
     <string name="google_maps_key">AIzaSyAdvu5x0-Dqvbx8du8Oh0fWRCFYXOIQ5k0</string>
-    <string name="trip_map_title">Select Destination</string>
-    <string name="trip_select_destination_hint">Tap on the map to choose your destination</string>
-    <string name="trip_join_carpool">Join Carpool</string>
     <string name="trip_location_permission_required">Location permission is required to fetch your origin.</string>
-    <string name="trip_destination_required">Please select a destination on the map.</string>
-    <string name="trip_origin_unavailable">Unable to fetch your current location. Turn on location and try again.</string>
     <string name="trip_join_success">Trip match request submitted successfully.</string>
-    <string name="trip_create_trip">Create Trip</string>
-    <string name="trip_cancel_trip">Cancel Trip</string>
     <string name="trip_hint_select_action">Select an action from the side menu</string>
     <string name="trip_hint_select_origin">Tap the map to set your starting point</string>
     <string name="trip_hint_select_destination">Now select your destination on the map</string>
@@ -39,5 +13,19 @@
     <string name="trip_confirm_button">Confirm</string>
     <string name="trip_origin_label">Origin: </string>
     <string name="trip_dest_label">Dest: </string>
-    <string name="verifyEmailOption">have an account? Verify Email Here</string>
+
+    <!-- New Landing Page Strings -->
+    <string name="landing_top_text">Your daily commute, reimagined</string>
+    <string name="landing_headline">Ride together. Save together.</string>
+    <string name="landing_description">Match with verified USIU community commuters on your route. Cut fuel costs by up to 60%% and make your commute the best part of your day.</string>
+    <string name="landing_sign_up">Sign Up</string>
+    <string name="landing_already_have_account">Already have an account, verify email now</string>
+    <string name="get_email_otp">Get Email Otp</string>
+    <string name="usiu_email_label">usiu email</string>
+    <string name="thanks_choosing_us">Thanks for choosing us</string>
+    <string name="enter_otp_label">Enter OTP</string>
+    <string name="didnt_receive_otp">Didn’t receive one? Resend</string>
+    <string name="submit">Submit</string>
+    <string name="enter_your_name_label">Enter your name</string>
+    <string name="register">Register</string>
 </resources>

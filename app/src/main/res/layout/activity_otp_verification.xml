@@ -5,104 +5,139 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/earthy_dark_background"
+    android:background="@color/verification_bg"
     tools:context=".OtpVerificationActivity">
 
     <ScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:isScrollContainer="true">
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="24dp"
-            android:paddingBottom="100dp">
+            android:padding="24dp">
 
             <ImageView
-                android:id="@+id/img_logo_small"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center"
+                android:id="@+id/img_welcome"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
                 android:layout_marginTop="32dp"
-                android:layout_marginBottom="16dp"
+                android:adjustViewBounds="true"
                 android:contentDescription="@string/logo_description"
-                android:src="@drawable/swoopr_logo" />
+                android:src="@drawable/big_chillin" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/thanks_choosing_us"
+                android:textColor="@color/verification_text_dark"
+                android:textSize="32sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="@string/enter_otp_label"
+                android:textColor="@color/verification_text_dark"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/glass_card"
-                android:orientation="vertical"
-                android:padding="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/otp_verification_title"
-                    android:textColor="@color/earthy_dark_text_primary"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_otp_message"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginBottom="32dp"
-                    android:gravity="center"
-                    android:text="@string/otp_sent_message"
-                    android:textColor="@color/earthy_dark_text_secondary"
-                    android:textSize="14sp" />
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/et_otp"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginBottom="24dp"
-                    android:autofillHints="smsOTPCode"
-                    android:background="@drawable/glass_card"
-                    android:backgroundTint="#20000000"
-                    android:gravity="center"
-                    android:hint="@string/otp_hint"
-                    android:inputType="number"
-                    android:letterSpacing="0.5"
-                    android:maxLength="3"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/earthy_dark_text_primary"
-                    android:textColorHint="@color/earthy_dark_text_disabled"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_verify_otp"
-                    android:layout_width="match_parent"
+                    android:id="@+id/et_otp_1"
+                    android:layout_width="48dp"
                     android:layout_height="60dp"
-                    android:background="@drawable/rounded_button"
-                    android:backgroundTint="@color/earthy_dark_primary"
-                    android:text="@string/verify_otp"
-                    android:textAllCaps="false"
-                    android:textColor="@color/earthy_dark_on_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/otp_box_background"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:maxLength="1"
+                    android:textColor="@color/verification_text_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:importantForAutofill="no"
+                    tools:ignore="LabelFor" />
 
-                <TextView
-                    android:id="@+id/tv_resend_otp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="24dp"
-                    android:text="@string/resend_otp"
-                    android:textColor="@color/earthy_dark_secondary"
-                    android:textStyle="bold" />
+                <EditText
+                    android:id="@+id/et_otp_2"
+                    android:layout_width="48dp"
+                    android:layout_height="60dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/otp_box_background"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:maxLength="1"
+                    android:textColor="@color/verification_text_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:importantForAutofill="no"
+                    tools:ignore="LabelFor" />
 
+                <EditText
+                    android:id="@+id/et_otp_3"
+                    android:layout_width="48dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/otp_box_background"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:maxLength="1"
+                    android:textColor="@color/verification_text_dark"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:importantForAutofill="no"
+                    tools:ignore="LabelFor" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_resend_otp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/didnt_receive_otp"
+                android:textColor="@color/earthy_dark_secondary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_verify_otp"
+                android:layout_width="220dp"
+                android:layout_height="64dp"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/rounded_button"
+                android:backgroundTint="@color/verification_button"
+                android:text="@string/submit"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <!-- Hidden elements for code compatibility -->
+            <TextView
+                android:id="@+id/tv_otp_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/et_otp"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:inputType="number"
+                android:visibility="gone"
+                android:importantForAutofill="no"
+                tools:ignore="LabelFor" />
+
         </LinearLayout>
     </ScrollView>
 

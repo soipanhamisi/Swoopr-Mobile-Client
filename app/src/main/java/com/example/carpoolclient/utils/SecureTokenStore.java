@@ -20,6 +20,7 @@ public final class SecureTokenStore {
     private static final String PREF_FILE = "secure_tokens";
     private static final String KEY_JWT = "jwt_token";
     private static final String KEY_FCM = "fcm_token";
+    private static final String KEY_FULL_NAME = "full_name";
     private static SecureTokenStore instance;
     private final SharedPreferences prefs;
 
@@ -117,5 +118,23 @@ public final class SecureTokenStore {
      */
     public String getFcmToken() {
         return prefs.getString(KEY_FCM, null);
+    }
+
+    /**
+     * Securely saves the user's full name to encrypted storage.
+     *
+     * @param name The full name to be stored.
+     */
+    public void saveFullName(String name) {
+        prefs.edit().putString(KEY_FULL_NAME, name).apply();
+    }
+
+    /**
+     * Retrieves the stored full name.
+     *
+     * @return The full name string, or {@code null} if no name is found.
+     */
+    public String getFullName() {
+        return prefs.getString(KEY_FULL_NAME, null);
     }
 }

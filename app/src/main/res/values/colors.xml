@@ -10,19 +10,18 @@
     <!-- Surfaces & Containers (Muted Moss Charcoal) -->
     <!-- Used for ride cards, bottom sheets, and dialog boxes -->
     <color name="earthy_dark_surface">#252D26</color>
-    <color name="earthy_dark_surface_variant">#2E3830</color>
 
     <!-- Brand Colors (Glowing Ochre & Terracotta Rust) -->
     <!-- Used for map routes, primary call-to-action buttons, and ETAs -->
     <color name="earthy_dark_primary">#F2AF5C</color>
     <color name="earthy_dark_secondary">#E67E65</color>
-    <color name="earthy_dark_accent">#8FA382</color> <!-- Soft Sage Accent -->
+    <!-- Soft Sage Accent -->
 
     <!-- Text & Typography (Parchment White & Soft Sage) -->
     <!-- Engineered to prevent eye strain and text bleeding in dark mode -->
     <color name="earthy_dark_text_primary">#EBE8E2</color>   <!-- High contrast: Names, addresses -->
     <color name="earthy_dark_text_secondary">#9EABA0</color> <!-- Medium contrast: Timestamps, distances -->
-    <color name="earthy_dark_text_disabled">#606B62</color>  <!-- Low contrast: Inactive tabs -->
+    <!-- Low contrast: Inactive tabs -->
 
     <!-- Interactive Component Text Colors -->
     <!-- Color of text when placed directly on top of primary/secondary elements -->
@@ -30,12 +29,16 @@
     <color name="earthy_dark_on_secondary">#290B04</color>
 
     <!-- Glass Effects (Semi-transparent) -->
-    <color name="glass_white">#B3FFFFFF</color>
-    <color name="glass_dark">#80202020</color>
 
     <!-- Landing Page Specific Colors -->
     <color name="landing_orange">#E67E65</color>
     <color name="landing_green">#2D7D5F</color>
     <color name="landing_link_blue">#3498DB</color>
     <color name="landing_text_black">#000000</color>
+
+    <!-- Email Verification Screen Colors -->
+    <color name="verification_bg">#7CB782</color>
+    <color name="verification_input_bg">#99C99D</color>
+    <color name="verification_button">#324B2C</color>
+    <color name="verification_text_dark">#000000</color>
 </resources>

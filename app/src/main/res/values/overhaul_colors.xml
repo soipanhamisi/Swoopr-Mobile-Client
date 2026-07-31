@@ -2,7 +2,6 @@
 <resources>
     <color name="dashboard_green_bg">#81C784</color>
     <color name="dashboard_card_bg">#E8F5E9</color>
-    <color name="dashboard_nav_bg">#2E7D32</color>
     <color name="dashboard_text_dark">#1B5E20</color>
     <color name="dashboard_icon_tint">#2E7D32</color>
     <color name="dashboard_divider">#C8E6C9</color>
