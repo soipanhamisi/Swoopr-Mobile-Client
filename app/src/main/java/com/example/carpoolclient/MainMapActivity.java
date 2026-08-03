@@ -71,6 +71,8 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     private TextView tvGreeting;
     private TextView tvTripStart, tvTripDest, tvDashboardTrip, tvNoActivity;
     private TextView tvRequestStart, tvRequestDest;
+    private View pendingTripCard;
+    private View btnNavChat;
     private View llRegisteredCarsSection;
     private LinearLayout llRegisteredCarsContainer;
     private View llExpandedContent;
@@ -110,11 +112,15 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         tvNoActivity = findViewById(R.id.tv_no_activity);
         tvRequestStart = findViewById(R.id.tv_request_start);
         tvRequestDest = findViewById(R.id.tv_request_dest);
+        pendingTripCard = findViewById(R.id.card_pending_trip);
+        btnNavChat = findViewById(R.id.btn_nav_chat);
         llRegisteredCarsSection = findViewById(R.id.ll_registered_cars_section);
         llRegisteredCarsContainer = findViewById(R.id.ll_registered_cars_container);
         llExpandedContent = findViewById(R.id.ll_expanded_content);
         btnConfirm = findViewById(R.id.btn_confirm_selection);
         btnMyLocation = findViewById(R.id.btn_my_location);
+        pendingTripCard.setVisibility(View.GONE);
+        syncChatButtonVisibility();
 
         View stationaryMenu = findViewById(R.id.stationary_bottom_menu);
         View bottomSheet = findViewById(R.id.bottom_sheet);
@@ -196,6 +202,10 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
         });
         findViewById(R.id.btn_nav_create).setOnClickListener(v -> {
             startActivity(new Intent(this, CreateCarpoolActivity.class));
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        });
+        btnNavChat.setOnClickListener(v -> {
+            startActivity(new Intent(this, ChatActivity.class));
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
         findViewById(R.id.btn_register_vehicle).setOnClickListener(v -> {
@@ -289,11 +299,11 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
 
         // 1. Scheduled Trips (Host View)
         webClient.get("/trips/queryPendingTrips", PendingTripDto.class, (success, message, data) -> {
-            View pendingCard = findViewById(R.id.card_pending_trip);
             if (success && data != null) {
                 PendingTripDto trip = (PendingTripDto) data;
                 tvNoActivity.setVisibility(View.GONE);
-                pendingCard.setVisibility(View.VISIBLE);
+                pendingTripCard.setVisibility(View.VISIBLE);
+                syncChatButtonVisibility();
 
                 tvTripStart.setText("Departure: " + formatDateTime(trip.getTripData().getDepartureTime()));
                 tvTripDest.setText("Capacity: " + trip.getTripData().getCapacity());
@@ -304,7 +314,8 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
                     tvDashboardTrip.setText("No other members");
                 }
             } else {
-                pendingCard.setVisibility(View.GONE);
+                pendingTripCard.setVisibility(View.GONE);
+                syncChatButtonVisibility();
                 checkEmptyActivity();
             }
         });
@@ -354,12 +365,16 @@ public class MainMapActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     private void checkEmptyActivity() {
-        View pendingCard = findViewById(R.id.card_pending_trip);
         View requestCard = findViewById(R.id.card_carpool_request);
-        if (pendingCard.getVisibility() == View.GONE && requestCard.getVisibility() == View.GONE) {
+        if (pendingTripCard.getVisibility() == View.GONE && requestCard.getVisibility() == View.GONE) {
             tvNoActivity.setVisibility(View.VISIBLE);
             tvNoActivity.setText("No activity");
         }
+        syncChatButtonVisibility();
+    }
+
+    private void syncChatButtonVisibility() {
+        btnNavChat.setVisibility(pendingTripCard.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
     }
 
     private String formatDateTime(String isoString) {
