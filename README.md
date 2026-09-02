@@ -19,12 +19,12 @@ The app connects users with verified peers traveling along similar routes, allow
 ## App look and feel
 
 <p align="center">
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter.gif" width="180" alt="Swoopr onboarding flow" />
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter (1).gif" width="180" alt="Swoopr map and route flow" />
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter (2).gif" width="180" alt="Swoopr carpool interaction" />
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter (3).gif" width="180" alt="Swoopr trip details" />
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter (4).gif" width="180" alt="Swoopr route and matching" />
-  <img src="../readmeGifs/ezgif.com-video-to-gif-converter (5).gif" width="180" alt="Swoopr app experience" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter.gif" width="180" alt="Swoopr onboarding flow" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter (1).gif" width="180" alt="Swoopr map and route flow" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter (2).gif" width="180" alt="Swoopr carpool interaction" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter (3).gif" width="180" alt="Swoopr trip details" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter (4).gif" width="180" alt="Swoopr route and matching" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter (5).gif" width="180" alt="Swoopr app experience" />
 </p>
 
 
