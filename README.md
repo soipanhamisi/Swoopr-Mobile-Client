@@ -19,7 +19,7 @@ The app connects users with verified peers traveling along similar routes, allow
 ## App look and feel
 <p align="center">
   <img src="readmeGifs/ezgif.com-censor.gif" alt="Swoopr preview 1" width="31%" />
-  <img src="readmeGifs/ezgif.com-censor%20(1).gif" alt="Swoopr preview 2" width="31%" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(4).gif" alt="Swoopr preview 7" width="31%" />
   <img src="readmeGifs/ezgif.com-censor%20(2).gif" alt="Swoopr preview 3" width="31%" />
 </p>
 
@@ -27,10 +27,6 @@ The app connects users with verified peers traveling along similar routes, allow
   <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(1).gif" alt="Swoopr preview 4" width="31%" />
   <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(2).gif" alt="Swoopr preview 5" width="31%" />
   <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(3).gif" alt="Swoopr preview 6" width="31%" />
-</p>
-
-<p align="center">
-  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(4).gif" alt="Swoopr preview 7" width="31%" />
 </p>
 
 
