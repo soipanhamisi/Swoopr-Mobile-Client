@@ -17,13 +17,21 @@ The app connects users with verified peers traveling along similar routes, allow
 4. Run the app on an emulator or Android device
 
 ## App look and feel
+<p align="center">
+  <img src="readmeGifs/ezgif.com-censor.gif" alt="Swoopr preview 1" width="31%" />
+  <img src="readmeGifs/ezgif.com-censor%20(1).gif" alt="Swoopr preview 2" width="31%" />
+  <img src="readmeGifs/ezgif.com-censor%20(2).gif" alt="Swoopr preview 3" width="31%" />
+</p>
 
-![Swoopr onboarding flow](readmeGifs/ezgif.com-video-to-gif-converter.gif)
-![Swoopr map and route flow](readmeGifs/ezgif.com-video-to-gif-converter%20(1).gif)
-![Swoopr carpool interaction](readmeGifs/ezgif.com-video-to-gif-converter%20(2).gif)
-![Swoopr trip details](readmeGifs/ezgif.com-video-to-gif-converter%20(3).gif)
-![Swoopr route and matching](readmeGifs/ezgif.com-video-to-gif-converter%20(4).gif)
-![Swoopr app experience](readmeGifs/ezgif.com-video-to-gif-converter%20(5).gif)
+<p align="center">
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(1).gif" alt="Swoopr preview 4" width="31%" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(2).gif" alt="Swoopr preview 5" width="31%" />
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(3).gif" alt="Swoopr preview 6" width="31%" />
+</p>
+
+<p align="center">
+  <img src="readmeGifs/ezgif.com-video-to-gif-converter%20(4).gif" alt="Swoopr preview 7" width="31%" />
+</p>
 
 
 ## Tech stack
